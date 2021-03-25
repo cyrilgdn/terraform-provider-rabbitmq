@@ -34,7 +34,7 @@ resource "rabbitmq_vhost" "vhost_1" {
 
 ## Requirements
 
-The RabbitMQ management plugin must be enabled to use this provider. You can
+The RabbitMQ management plugin must be enabled on the server, to use this provider. You can
 enable the plugin by doing something similar to:
 
 ```
