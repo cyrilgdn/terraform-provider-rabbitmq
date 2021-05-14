@@ -3,7 +3,6 @@ package rabbitmq
 import (
 	"fmt"
 	"log"
-	"strings"
 
 	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
 
@@ -82,8 +81,15 @@ func ReadUser(d *schema.ResourceData, meta interface{}) error {
 	d.Set("name", user.Name)
 
 	if len(user.Tags) > 0 {
-		tags := strings.Split(user.Tags, ",")
-		d.Set("tags", tags)
+		var tagList []string
+		for _, v := range user.Tags {
+			if v != "" {
+				tagList = append(tagList, v)
+			}
+		}
+		if len(tagList) > 0 {
+			d.Set("tags", tagList)
+		}
 	}
 
 	return nil
@@ -140,15 +146,13 @@ func DeleteUser(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func userTagsToString(d *schema.ResourceData) string {
-	var tags string
-	tagList := []string{}
+func userTagsToString(d *schema.ResourceData) rabbithole.UserTags {
+	tagList := rabbithole.UserTags{}
 	for _, v := range d.Get("tags").([]interface{}) {
 		if tag, ok := v.(string); ok {
 			tagList = append(tagList, tag)
 		}
 	}
-	tags = strings.Join(tagList, ",")
 
-	return tags
+	return tagList
 }

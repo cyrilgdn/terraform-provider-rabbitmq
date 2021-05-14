@@ -2,7 +2,6 @@ package rabbitmq
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
@@ -197,7 +196,7 @@ func testAccUserCheckTagCount(name *string, tagCount int) resource.TestCheckFunc
 		}
 
 		var tagList []string
-		for _, v := range strings.Split(user.Tags, ",") {
+		for _, v := range user.Tags {
 			if v != "" {
 				tagList = append(tagList, v)
 			}

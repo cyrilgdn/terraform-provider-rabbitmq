@@ -153,8 +153,12 @@ func ReadFederationUpstream(d *schema.ResourceData, meta interface{}) error {
 	d.Set("vhost", upstream.Vhost)
 	d.Set("component", upstream.Component)
 
+	var uri string
+	if len(upstream.Definition.Uri) > 0 {
+		uri = upstream.Definition.Uri[0]
+	}
 	defMap := map[string]interface{}{
-		"uri":             upstream.Definition.Uri,
+		"uri":             uri,
 		"prefetch_count":  upstream.Definition.PrefetchCount,
 		"reconnect_delay": upstream.Definition.ReconnectDelay,
 		"ack_mode":        upstream.Definition.AckMode,
@@ -231,7 +235,7 @@ func putFederationUpstream(rmqc *rabbithole.Client, vhost string, name string, d
 	log.Printf("[DEBUG] RabbitMQ: Attempting to put federation definition for %s@%s: %#v", name, vhost, defMap)
 
 	if v, ok := defMap["uri"].(string); ok {
-		definition.Uri = v
+		definition.Uri = []string{v}
 	}
 
 	if v, ok := defMap["expires"].(int); ok {
