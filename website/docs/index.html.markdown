@@ -58,3 +58,7 @@ The following arguments are supported:
   from the `RABBITMQ_INSECURE` Environment Variable.
 * `cacert_file` - (Optional) The path to a custom CA / intermediate certificate.
   This can also be sourced from the `RABBITMQ_CACERT` Environment Variable.
+* `clientcert_file` - (Optional) The path to the X.509 client certificate
+  This can also be source from the `RABBITMQ_CLIENTCERT` Environment Variable
+* `clientkey_file` - (Optional) The path to the private key 
+  This can also be source from the `RABBITMQ_CLIENTKEY` Environment Variable
