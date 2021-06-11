@@ -5,4 +5,4 @@ require (
 	github.com/michaelklishin/rabbit-hole/v2 v2.4.0
 )
 
-go 1.14
+go 1.15
