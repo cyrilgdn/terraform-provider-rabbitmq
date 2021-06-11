@@ -164,7 +164,7 @@ func testAccFederationUpstreamCheckDestroy(upstream *rabbithole.FederationUpstre
 }
 
 func testAccFederationUpstream_baseConfig() string {
-	return fmt.Sprintf(`
+	return `
 resource "rabbitmq_vhost" "test" {
 		name = "test"
 }
@@ -178,12 +178,11 @@ resource "rabbitmq_permissions" "guest" {
 				read = ".*"
 		}
 }
-
-`)
+`
 }
 
 func testAccFederationUpstream_create() string {
-	return testAccFederationUpstream_baseConfig() + fmt.Sprintf(`
+	return testAccFederationUpstream_baseConfig() + `
 resource "rabbitmq_federation_upstream" "foo" {
 		name = "foo"
 		vhost = rabbitmq_permissions.guest.vhost
@@ -203,11 +202,11 @@ resource "rabbitmq_federation_upstream" "foo" {
 				queue = ""
 		}
 }
-`)
+`
 }
 
 func testAccFederationUpstream_update() string {
-	return testAccFederationUpstream_baseConfig() + fmt.Sprintf(`
+	return testAccFederationUpstream_baseConfig() + `
 resource "rabbitmq_federation_upstream" "foo" {
 		name = "foo"
 		vhost = rabbitmq_permissions.guest.vhost
@@ -227,11 +226,11 @@ resource "rabbitmq_federation_upstream" "foo" {
 				queue = ""
 		}
 }
-`)
+`
 }
 
 func testAccFederationUpstream_basic() string {
-	return testAccFederationUpstream_baseConfig() + fmt.Sprintf(`
+	return testAccFederationUpstream_baseConfig() + `
 resource "rabbitmq_federation_upstream" "foo" {
 		name = "foo"
 		vhost = rabbitmq_permissions.guest.vhost
@@ -240,11 +239,11 @@ resource "rabbitmq_federation_upstream" "foo" {
 				uri = "amqp://server-name"
 		}
 }
-`)
+`
 }
 
 func testAccFederationUpstream_validation() string {
-	return testAccFederationUpstream_baseConfig() + fmt.Sprintf(`
+	return testAccFederationUpstream_baseConfig() + `
 resource "rabbitmq_federation_upstream" "foo" {
 		name = "foo"
 		vhost = rabbitmq_permissions.guest.vhost
@@ -254,5 +253,5 @@ resource "rabbitmq_federation_upstream" "foo" {
 				ack_mode = "not-valid"
 		}
 }
-`)
+`
 }

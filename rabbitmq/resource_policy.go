@@ -234,9 +234,7 @@ func putPolicy(rmqc *rabbithole.Client, vhost string, name string, policyMap map
 			}
 		}
 
-		policyDefinition := rabbithole.PolicyDefinition{}
-		policyDefinition = v
-		policy.Definition = policyDefinition
+		policy.Definition = v
 	}
 
 	log.Printf("[DEBUG] RabbitMQ: Attempting to declare policy for %s@%s: %#v", name, vhost, policy)
