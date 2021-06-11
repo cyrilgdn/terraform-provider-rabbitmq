@@ -15,7 +15,7 @@ test: fmtcheck
 		xargs -t -n4 go test $(TESTARGS) -timeout=30s -parallel=4
 
 testacc: fmtcheck
-	TF_ACC=1 go test $(TEST) -count $(TEST_COUNT) -v $(TESTARGS) -timeout 120m
+	scripts/testacc.sh
 
 vet:
 	@echo "go vet ."
