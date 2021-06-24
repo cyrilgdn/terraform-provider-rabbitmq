@@ -88,6 +88,7 @@ func Provider() terraform.ResourceProvider {
 			"rabbitmq_permissions":         resourcePermissions(),
 			"rabbitmq_topic_permissions":   resourceTopicPermissions(),
 			"rabbitmq_federation_upstream": resourceFederationUpstream(),
+			"rabbitmq_operator_policy":     resourceOperatorPolicy(),
 			"rabbitmq_policy":              resourcePolicy(),
 			"rabbitmq_queue":               resourceQueue(),
 			"rabbitmq_user":                resourceUser(),
