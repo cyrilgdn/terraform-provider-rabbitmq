@@ -225,9 +225,7 @@ func putOperatorPolicy(rmqc *rabbithole.Client, vhost string, name string, opera
 			}
 		}
 
-		operatorPolicyDefinition := rabbithole.PolicyDefinition{}
-		operatorPolicyDefinition = v
-		operatorPolicy.Definition = operatorPolicyDefinition
+		operatorPolicy.Definition = v
 	}
 
 	log.Printf("[DEBUG] RabbitMQ: Attempting to declare operator policy for %s@%s: %#v", name, vhost, operatorPolicy)
