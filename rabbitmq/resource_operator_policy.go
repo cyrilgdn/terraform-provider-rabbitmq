@@ -183,7 +183,7 @@ func DeleteOperatorPolicy(d *schema.ResourceData, meta interface{}) error {
 	resp, err := rmqc.DeleteOperatorPolicy(vhost, name)
 	log.Printf("[DEBUG] RabbitMQ: OperatorPolicy delete response: %#v", resp)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not delete operator policy: %w", err)
 	}
 
 	if resp.StatusCode == 404 {
