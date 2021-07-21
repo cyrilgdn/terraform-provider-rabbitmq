@@ -39,7 +39,7 @@ resource "rabbitmq_operator_policy" "test" {
 
     definition = {
       message-ttl = 3600000
-			expires = 1800000
+      expires = 1800000
     }
   }
 }
