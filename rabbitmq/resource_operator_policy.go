@@ -82,8 +82,7 @@ func CreateOperatorPolicy(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	id := fmt.Sprintf("%s@%s", name, vhost)
-	d.SetId(id)
+	d.SetId(fmt.Sprintf("%s@%s", name, vhost))
 
 	return ReadOperatorPolicy(d, meta)
 }
