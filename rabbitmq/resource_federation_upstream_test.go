@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
 )
 
@@ -106,7 +106,7 @@ func TestAccFederationUpstream_validation(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccFederationUpstream_validation(),
-				ExpectError: regexp.MustCompile("^config is invalid"),
+				ExpectError: regexp.MustCompile("expected definition.0.ack_mode to be one of"),
 			},
 		},
 	})

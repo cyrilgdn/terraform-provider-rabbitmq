@@ -6,9 +6,9 @@ import (
 	"log"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/structure"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
 )
 
@@ -66,7 +66,7 @@ func resourceQueue() *schema.Resource {
 						"arguments_json": {
 							Type:             schema.TypeString,
 							Optional:         true,
-							ValidateFunc:     validation.ValidateJsonString,
+							ValidateFunc:     validation.StringIsJSON,
 							ConflictsWith:    []string{"settings.0.arguments"},
 							DiffSuppressFunc: structure.SuppressJsonDiff,
 							ForceNew:         true,
