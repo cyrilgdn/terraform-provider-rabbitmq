@@ -19,7 +19,7 @@ func resourceBinding() *schema.Resource {
 		Read:   ReadBinding,
 		Delete: DeleteBinding,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

@@ -18,7 +18,7 @@ func resourcePolicy() *schema.Resource {
 		Read:   ReadPolicy,
 		Delete: DeletePolicy,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

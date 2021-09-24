@@ -18,7 +18,7 @@ func resourceQueue() *schema.Resource {
 		Read:   ReadQueue,
 		Delete: DeleteQueue,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

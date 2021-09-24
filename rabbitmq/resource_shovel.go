@@ -16,7 +16,7 @@ func resourceShovel() *schema.Resource {
 		Read:   ReadShovel,
 		Delete: DeleteShovel,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

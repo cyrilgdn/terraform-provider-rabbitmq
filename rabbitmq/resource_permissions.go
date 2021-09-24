@@ -17,7 +17,7 @@ func resourcePermissions() *schema.Resource {
 		Read:   ReadPermissions,
 		Delete: DeletePermissions,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

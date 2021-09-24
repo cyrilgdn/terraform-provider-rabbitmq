@@ -15,7 +15,7 @@ func resourceVhost() *schema.Resource {
 		Read:   ReadVhost,
 		Delete: DeleteVhost,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
