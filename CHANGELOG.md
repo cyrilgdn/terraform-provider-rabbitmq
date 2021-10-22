@@ -1,4 +1,30 @@
-## 1.5.1 (Unreleased)
+## 1.6.0 (September 01, 2021)
+
+FEATURES:
+
+* Allow configuration of a RabbitMQ-specific proxy - @haines
+  ([#16](https://github.com/cyrilgdn/terraform-provider-rabbitmq/pull/16))
+
+* Update rabbit-hole to 2.10.0 - @MrLuje
+  ([#14](https://github.com/cyrilgdn/terraform-provider-rabbitmq/pull/14))
+
+DOCUMENTATION:
+
+* `provider`: Add `clientcert_file` and `clientkey_file` documentation - @nico2610
+  ([#10](https://github.com/cyrilgdn/terraform-provider-rabbitmq/pull/10))
+
+DEV IMPROVEMENTS:
+
+* Configure Github actions to run acceptance tests - @cyrilgdn
+  ([#11](https://github.com/cyrilgdn/terraform-provider-rabbitmq/pull/11))
+
+* Run golangci-lint in Github actions - @cyrilgdn
+  ([#12](https://github.com/cyrilgdn/terraform-provider-rabbitmq/pull/12))
+
+* Update to go1.15 and remove vendor directory - @cyrilgdn
+  ([#13](https://github.com/cyrilgdn/terraform-provider-rabbitmq/pull/13))
+
+## 1.5.1 (November 11, 2020)
 
 FEATURES:
 

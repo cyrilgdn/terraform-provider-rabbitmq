@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 
 	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func Provider() terraform.ResourceProvider {
+func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"endpoint": {
@@ -75,10 +75,17 @@ func Provider() terraform.ResourceProvider {
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("RABBITMQ_CLIENTCERT", ""),
 			},
+
 			"clientkey_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("RABBITMQ_CLIENTKEY", ""),
+			},
+
+			"proxy": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("RABBITMQ_PROXY", ""),
 			},
 		},
 
@@ -109,6 +116,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	var cacertFile = d.Get("cacert_file").(string)
 	var clientcertFile = d.Get("clientcert_file").(string)
 	var clientkeyFile = d.Get("clientkey_file").(string)
+	var proxy = d.Get("proxy").(string)
 
 	// Configure TLS/SSL:
 	// Ignore self-signed cert warnings
@@ -136,8 +144,27 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		tlsConfig.InsecureSkipVerify = true
 	}
 
+	var proxyURL *url.URL
+	if proxy != "" {
+		var err error
+		proxyURL, err = url.Parse(proxy)
+		if err != nil {
+			return nil, fmt.Errorf("invalid proxy URL %q: %w", proxy, err)
+		}
+	}
+
 	// Connect to RabbitMQ management interface
-	transport := &http.Transport{TLSClientConfig: tlsConfig, Proxy: http.ProxyFromEnvironment}
+	transport := &http.Transport{
+		TLSClientConfig: tlsConfig,
+		Proxy: func(req *http.Request) (*url.URL, error) {
+			if proxyURL != nil {
+				return proxyURL, nil
+			}
+
+			return http.ProxyFromEnvironment(req)
+		},
+	}
+
 	rmqc, err := rabbithole.NewTLSClient(endpoint, username, password, transport)
 	if err != nil {
 		return nil, err

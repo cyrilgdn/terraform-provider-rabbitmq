@@ -7,7 +7,7 @@ import (
 
 	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourcePermissions() *schema.Resource {
@@ -17,7 +17,7 @@ func resourcePermissions() *schema.Resource {
 		Read:   ReadPermissions,
 		Delete: DeletePermissions,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{

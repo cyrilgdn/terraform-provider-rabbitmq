@@ -7,9 +7,9 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/structure"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
 )
 
@@ -19,7 +19,7 @@ func resourceBinding() *schema.Resource {
 		Read:   ReadBinding,
 		Delete: DeleteBinding,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -68,7 +68,7 @@ func resourceBinding() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				ForceNew:         true,
-				ValidateFunc:     validation.ValidateJsonString,
+				ValidateFunc:     validation.StringIsJSON,
 				ConflictsWith:    []string{"arguments"},
 				DiffSuppressFunc: structure.SuppressJsonDiff,
 			},
