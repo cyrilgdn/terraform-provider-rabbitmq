@@ -37,6 +37,9 @@ resource "rabbitmq_queue" "test" {
   settings {
     durable     = false
     auto_delete = true
+    arguments = {
+      "x-queue-type" : "quorum",
+    }
   }
 }
 ```
@@ -107,6 +110,8 @@ The `settings` block supports:
   non-string values.
 
 ## Attributes Reference
+
+* `x-queue-type` - (Optional) this argument sets the queue type. Possible values: `classic` (default), `quorum`, `stream` .
 
 No further attributes are exported.
 
