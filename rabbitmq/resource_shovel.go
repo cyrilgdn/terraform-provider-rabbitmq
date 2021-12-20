@@ -24,17 +24,14 @@ func resourceShovel() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
 			"vhost": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
 			"info": {
 				Type:     schema.TypeList,
 				Required: true,
-				ForceNew: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
