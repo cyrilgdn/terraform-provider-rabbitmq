@@ -13,6 +13,7 @@ import (
 func resourceShovel() *schema.Resource {
 	return &schema.Resource{
 		Create: CreateShovel,
+		Update: UpdateShovel,
 		Read:   ReadShovel,
 		Delete: DeleteShovel,
 		Importer: &schema.ResourceImporter{
@@ -255,6 +256,38 @@ func ReadShovel(d *schema.ResourceData, meta interface{}) error {
 	d.Set("info", []map[string]interface{}{info})
 
 	return nil
+}
+
+func UpdateShovel(d *schema.ResourceData, meta interface{}) error {
+	rmqc := meta.(*rabbithole.Client)
+
+	ID := strings.Split(d.Id(), "@")
+	if len(ID) < 2 {
+		return fmt.Errorf("Unable to determine Shovel ID")
+	}
+
+	shovelName := ID[0]
+	vhost := ID[1]
+
+	if d.HasChange("info") {
+		_, newShovel := d.GetChange("info")
+
+		newShovelList := newShovel.([]interface{})
+		infoMap, ok := newShovelList[0].(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("Unable to parse shovel info")
+		}
+
+		shovelDefinition := setShovelDefinition(infoMap).(rabbithole.ShovelDefinition)
+
+		log.Printf("[DEBUG] RabbitMQ: Attempting to declare shovel %s in vhost %s", shovelName, vhost)
+		resp, err := rmqc.DeclareShovel(vhost, shovelName, shovelDefinition)
+		log.Printf("[DEBUG] RabbitMQ: shovel declartion response: %#v", resp)
+		if err != nil {
+			return err
+		}
+	}
+	return ReadShovel(d, meta)
 }
 
 func DeleteShovel(d *schema.ResourceData, meta interface{}) error {
