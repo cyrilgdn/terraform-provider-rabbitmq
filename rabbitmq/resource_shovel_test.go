@@ -24,6 +24,12 @@ func TestAccShovel(t *testing.T) {
 					"rabbitmq_shovel.shovelTest", &shovelInfo,
 				),
 			},
+			{
+				Config: testAccShovelConfig_update,
+				Check: testAccShovelCheck(
+					"rabbitmq_shovel.shovelTest", &shovelInfo,
+				),
+			},
 		},
 	})
 }
@@ -120,5 +126,51 @@ resource "rabbitmq_shovel" "shovelTest" {
 		source_exchange_key = "test"
 		destination_uri = "amqp:///test"
 		destination_queue = "${rabbitmq_queue.test.name}"
+	}
+}`
+
+const testAccShovelConfig_update = `
+resource "rabbitmq_vhost" "test" {
+    name = "test"
+}
+
+resource "rabbitmq_permissions" "guest" {
+    user = "guest"
+    vhost = "${rabbitmq_vhost.test.name}"
+    permissions {
+        configure = ".*"
+        write = ".*"
+        read = ".*"
+    }
+}
+
+resource "rabbitmq_exchange" "foo" {
+    name = "foo_exchange"
+    vhost = "${rabbitmq_permissions.guest.vhost}"
+    settings {
+        type = "fanout"
+        durable = false
+        auto_delete = true
+    }
+}
+
+resource "rabbitmq_queue" "bar" {
+	name = "bar_queue"
+	vhost = "${rabbitmq_exchange.foo.vhost}"
+	settings {
+		durable = false
+		auto_delete = true
+	}
+}
+
+resource "rabbitmq_shovel" "shovelTest" {
+	name = "shovelTest"
+	vhost = "${rabbitmq_queue.bar.vhost}"
+	info {
+		source_uri = "amqp:///test"
+		source_exchange = "${rabbitmq_exchange.foo.name}"
+		source_exchange_key = "foobar"
+		destination_uri = "amqp:///test"
+		destination_queue = "${rabbitmq_queue.bar.name}"
 	}
 }`
