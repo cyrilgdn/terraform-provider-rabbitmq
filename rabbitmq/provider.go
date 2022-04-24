@@ -101,6 +101,7 @@ func Provider() *schema.Provider {
 			"rabbitmq_user":                resourceUser(),
 			"rabbitmq_vhost":               resourceVhost(),
 			"rabbitmq_shovel":              resourceShovel(),
+			"rabbitmq_limit":               resourceLimit(),
 		},
 
 		ConfigureFunc: providerConfigure,
