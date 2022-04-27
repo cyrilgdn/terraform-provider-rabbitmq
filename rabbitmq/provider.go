@@ -102,6 +102,19 @@ func Provider() *schema.Provider {
 			"rabbitmq_vhost":               resourceVhost(),
 			"rabbitmq_shovel":              resourceShovel(),
 		},
+		DataSourcesMap: map[string]*schema.Resource{
+			// "rabbitmq_binding":             dataSourcesBinding(),
+			"rabbitmq_exchange": dataSourcesExchange(),
+			// "rabbitmq_permissions":         dataSourcesPermissions(),
+			// "rabbitmq_topic_permissions":   dataSourcesTopicPermissions(),
+			// "rabbitmq_federation_upstream": dataSourcesFederationUpstream(),
+			// "rabbitmq_operator_policy":     dataSourcesOperatorPolicy(),
+			// "rabbitmq_policy":              dataSourcesPolicy(),
+			// "rabbitmq_queue":               dataSourcesQueue(),
+			"rabbitmq_user":  dataSourcesUser(),
+			"rabbitmq_vhost": dataSourcesVhost(),
+			// "rabbitmq_shovel":              dataSourcesShovel(),
+		},
 
 		ConfigureFunc: providerConfigure,
 	}
