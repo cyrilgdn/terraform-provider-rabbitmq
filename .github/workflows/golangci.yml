@@ -14,6 +14,6 @@ jobs:
           go-version: 1.16.x
 
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v2.5.2
+        uses: golangci/golangci-lint-action@v3.2.0
         with:
-          version: v1.40
+          version: v1.48
