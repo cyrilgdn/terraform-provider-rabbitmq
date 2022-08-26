@@ -33,7 +33,7 @@ $ make build
 Using the provider
 ------------------
 
-The provider supports verions `3.8.x` and `3.7.x` of RabbitMQ. It may still work with version`3.6.x`, however this version is no longer supported.
+The provider supports versions `3.10.x`,`3.9.x`,`3.8.x` and `3.7.x` of RabbitMQ. It may still work with version`3.6.x`, however this version is no longer supported.
 
 For information on RabbitMQ versions, see the RabbitMQ [version documentation](https://www.rabbitmq.com/versions.html) and [changelog](https://www.rabbitmq.com/changelog.html).
 

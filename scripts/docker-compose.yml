@@ -2,7 +2,7 @@ version: "3"
 
 services:
     rabbitmq:
-        image: rabbitmq:${RABBITMQ_VERSION:-3.8}-management-alpine
+        image: rabbitmq:${RABBITMQ_VERSION:-3.10}-management-alpine
         environment:
             RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-guest}
             RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
