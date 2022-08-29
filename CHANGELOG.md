@@ -1,3 +1,27 @@
+## 1.7.0 (August 20, 2022)
+
+FEATURES:
+
+* `rabbitmq_operator_policy`: new resource - @MrLuje
+  ([#8](https://github.com/cyrilgdn/terraform-provider-rabbitmq/pull/8))
+ 
+* Add `rabbitmq_vhost`, `rabbitmq_user` and `rabbitmq_exchange` datasources - @Skeen
+  ([#37](https://github.com/cyrilgdn/terraform-provider-rabbitmq/pull/37))
+
+
+FIX:
+
+* `rabbitmq_shovel`: ForceNew on every parameters - @akurz
+  ([#27](https://github.com/cyrilgdn/terraform-provider-rabbitmq/pull/27))
+
+BUILD / DEV:
+
+* Update Terraform SDK to v2 and Go to 1.19 - @cyrilgdn
+  ([#21](https://github.com/cyrilgdn/terraform-provider-rabbitmq/pull/21))
+  ([#38](https://github.com/cyrilgdn/terraform-provider-rabbitmq/pull/38))
+
+
+
 ## 1.6.0 (September 01, 2021)
 
 FEATURES:

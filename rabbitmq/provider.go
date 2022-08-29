@@ -4,9 +4,9 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 
 	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
 
@@ -102,6 +102,11 @@ func Provider() *schema.Provider {
 			"rabbitmq_vhost":               resourceVhost(),
 			"rabbitmq_shovel":              resourceShovel(),
 		},
+		DataSourcesMap: map[string]*schema.Resource{
+			"rabbitmq_exchange": dataSourcesExchange(),
+			"rabbitmq_user":     dataSourcesUser(),
+			"rabbitmq_vhost":    dataSourcesVhost(),
+		},
 
 		ConfigureFunc: providerConfigure,
 	}
@@ -124,7 +129,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	// Specify a certificate and key
 	tlsConfig := &tls.Config{}
 	if cacertFile != "" {
-		caCert, err := ioutil.ReadFile(cacertFile)
+		caCert, err := os.ReadFile(cacertFile)
 		if err != nil {
 			return nil, err
 		}
