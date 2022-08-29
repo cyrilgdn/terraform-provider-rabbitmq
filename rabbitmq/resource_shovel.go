@@ -24,10 +24,12 @@ func resourceShovel() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"vhost": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"info": {
 				Type:     schema.TypeList,
@@ -282,13 +284,8 @@ func ReadShovel(d *schema.ResourceData, meta interface{}) error {
 func UpdateShovel(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	ID := strings.Split(d.Id(), "@")
-	if len(ID) < 2 {
-		return fmt.Errorf("Unable to determine Shovel ID")
-	}
-
-	shovelName := ID[0]
-	vhost := ID[1]
+	vhost := d.Get("vhost").(string)
+	shovelName := d.Get("name").(string)
 
 	if d.HasChange("info") {
 		_, newShovel := d.GetChange("info")

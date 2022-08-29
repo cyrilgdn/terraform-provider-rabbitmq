@@ -55,7 +55,27 @@ func testAccShovelCheck(rn string, shovelInfo *rabbithole.ShovelInfo) resource.T
 
 		for _, info := range shovelInfos {
 			if info.Name == shovelParts[0] && info.Vhost == shovelParts[1] {
+				expectedSourceExchange := rs.Primary.Attributes["info.0.source_exchange"]
+				expectedSourceExchangeKey := rs.Primary.Attributes["info.0.source_exchange_key"]
+				expectedSourceUri := rs.Primary.Attributes["info.0.source_uri"]
+				expectedDestinationUri := rs.Primary.Attributes["info.0.destination_uri"]
 				shovelInfo = &info
+				actualSourceExchange := shovelInfo.Definition.SourceExchange
+				actualSourceExchangeKey := shovelInfo.Definition.SourceExchangeKey
+				actualSourceUri := shovelInfo.Definition.SourceURI[0]
+				actualDestinationUri := shovelInfo.Definition.DestinationURI[0]
+				if actualSourceExchange != expectedSourceExchange {
+					return fmt.Errorf("SourceExchange was not set to [%s], was [%s]", expectedSourceExchange, actualSourceExchange)
+				}
+				if actualSourceExchangeKey != expectedSourceExchangeKey {
+					return fmt.Errorf("sourceExchangeKey was not set to [%s], was [%s]", expectedSourceExchangeKey, actualSourceExchangeKey)
+				}
+				if actualSourceUri != expectedSourceUri {
+					return fmt.Errorf("SourceUri was not set to [%s], was [%s]", expectedSourceUri, actualSourceUri)
+				}
+				if actualDestinationUri != expectedDestinationUri {
+					return fmt.Errorf("DestinationUri was not set to [%s], was [%s]", expectedDestinationUri, actualDestinationUri)
+				}
 				return nil
 			}
 		}
