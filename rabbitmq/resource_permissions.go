@@ -3,7 +3,6 @@ package rabbitmq
 import (
 	"fmt"
 	"log"
-	"strings"
 
 	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
 
@@ -86,13 +85,10 @@ func CreatePermissions(d *schema.ResourceData, meta interface{}) error {
 func ReadPermissions(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	permissionId := strings.Split(d.Id(), "@")
-	if len(permissionId) < 2 {
-		return fmt.Errorf("Unable to determine Permission ID")
+	user, vhost, err := parseResourceId(d)
+	if err != nil {
+		return err
 	}
-
-	user := permissionId[0]
-	vhost := permissionId[1]
 
 	userPerms, err := rmqc.GetPermissionsIn(vhost, user)
 	if err != nil {
@@ -118,7 +114,7 @@ func ReadPermissions(d *schema.ResourceData, meta interface{}) error {
 func UpdatePermissions(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	user, vhost, err := parseID(d)
+	user, vhost, err := parseResourceId(d)
 	if err != nil {
 		return err
 	}
@@ -143,7 +139,7 @@ func UpdatePermissions(d *schema.ResourceData, meta interface{}) error {
 func DeletePermissions(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	user, vhost, err := parseID(d)
+	user, vhost, err := parseResourceId(d)
 	if err != nil {
 		return err
 	}
@@ -196,12 +192,4 @@ func setPermissionsIn(rmqc *rabbithole.Client, vhost string, user string, permsM
 	}
 
 	return nil
-}
-
-func parseID(d *schema.ResourceData) (string, string, error) {
-	ID := strings.Split(d.Id(), "@")
-	if len(ID) < 2 {
-		return "", "", fmt.Errorf("Unable to determine Permission ID")
-	}
-	return ID[0], ID[1], nil
 }

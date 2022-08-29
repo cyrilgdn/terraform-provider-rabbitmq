@@ -3,7 +3,6 @@ package rabbitmq
 import (
 	"fmt"
 	"log"
-	"strings"
 
 	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
 
@@ -232,10 +231,10 @@ func CreateShovel(d *schema.ResourceData, meta interface{}) error {
 func ReadShovel(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	shovelId := strings.Split(d.Id(), "@")
-
-	name := shovelId[0]
-	vhost := shovelId[1]
+	name, vhost, err := parseResourceId(d)
+	if err != nil {
+		return err
+	}
 
 	shovelInfo, err := rmqc.GetShovel(vhost, name)
 	if err != nil {
@@ -284,7 +283,7 @@ func ReadShovel(d *schema.ResourceData, meta interface{}) error {
 func UpdateShovel(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	name, vhost, err := parseID(d)
+	name, vhost, err := parseResourceId(d)
 	if err != nil {
 		return err
 	}
@@ -313,10 +312,10 @@ func UpdateShovel(d *schema.ResourceData, meta interface{}) error {
 func DeleteShovel(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	shovelId := strings.Split(d.Id(), "@")
-
-	name := shovelId[0]
-	vhost := shovelId[1]
+	name, vhost, err := parseResourceId(d)
+	if err != nil {
+		return err
+	}
 
 	log.Printf("[DEBUG] RabbitMQ: Attempting to delete shovel %s", d.Id())
 

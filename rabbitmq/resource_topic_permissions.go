@@ -90,7 +90,7 @@ func CreateTopicPermissions(d *schema.ResourceData, meta interface{}) error {
 func ReadTopicPermissions(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	user, vhost, err := parseID(d)
+	user, vhost, err := parseResourceId(d)
 	if err != nil {
 		return err
 	}
@@ -122,7 +122,7 @@ func ReadTopicPermissions(d *schema.ResourceData, meta interface{}) error {
 func UpdateTopicPermissions(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	user, vhost, err := parseID(d)
+	user, vhost, err := parseResourceId(d)
 	if err != nil {
 		return err
 	}
@@ -153,7 +153,7 @@ func UpdateTopicPermissions(d *schema.ResourceData, meta interface{}) error {
 func DeleteTopicPermissions(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	user, vhost, err := parseID(d)
+	user, vhost, err := parseResourceId(d)
 	if err != nil {
 		return err
 	}

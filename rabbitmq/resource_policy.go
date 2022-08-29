@@ -91,13 +91,10 @@ func CreatePolicy(d *schema.ResourceData, meta interface{}) error {
 func ReadPolicy(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	policyId := strings.Split(d.Id(), "@")
-	if len(policyId) < 2 {
-		return fmt.Errorf("Unable to determine policy ID")
+	name, vhost, err := parseResourceId(d)
+	if err != nil {
+		return err
 	}
-
-	name := policyId[0]
-	vhost := policyId[1]
 
 	policy, err := rmqc.GetPolicy(vhost, name)
 	if err != nil {
@@ -142,13 +139,10 @@ func ReadPolicy(d *schema.ResourceData, meta interface{}) error {
 func UpdatePolicy(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	policyId := strings.Split(d.Id(), "@")
-	if len(policyId) < 2 {
-		return fmt.Errorf("Unable to determine policy ID")
+	name, vhost, err := parseResourceId(d)
+	if err != nil {
+		return err
 	}
-
-	name := policyId[0]
-	vhost := policyId[1]
 
 	if d.HasChange("policy") {
 		_, newPolicy := d.GetChange("policy")
@@ -170,13 +164,10 @@ func UpdatePolicy(d *schema.ResourceData, meta interface{}) error {
 func DeletePolicy(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	policyId := strings.Split(d.Id(), "@")
-	if len(policyId) < 2 {
-		return fmt.Errorf("Unable to determine policy ID")
+	name, vhost, err := parseResourceId(d)
+	if err != nil {
+		return err
 	}
-
-	name := policyId[0]
-	vhost := policyId[1]
 
 	log.Printf("[DEBUG] RabbitMQ: Attempting to delete policy for %s", d.Id())
 

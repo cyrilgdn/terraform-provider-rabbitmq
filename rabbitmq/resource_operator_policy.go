@@ -90,13 +90,10 @@ func CreateOperatorPolicy(d *schema.ResourceData, meta interface{}) error {
 func ReadOperatorPolicy(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	operatorPolicyId := strings.Split(d.Id(), "@")
-	if len(operatorPolicyId) < 2 {
-		return fmt.Errorf("Unable to determine operator policy ID")
+	name, vhost, err := parseResourceId(d)
+	if err != nil {
+		return err
 	}
-
-	name := operatorPolicyId[0]
-	vhost := operatorPolicyId[1]
 
 	operatorPolicy, err := rmqc.GetOperatorPolicy(vhost, name)
 	if err != nil {
@@ -141,13 +138,10 @@ func ReadOperatorPolicy(d *schema.ResourceData, meta interface{}) error {
 func UpdateOperatorPolicy(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	operatorPolicyId := strings.Split(d.Id(), "@")
-	if len(operatorPolicyId) < 2 {
-		return fmt.Errorf("Unable to determine operator policy ID")
+	name, vhost, err := parseResourceId(d)
+	if err != nil {
+		return err
 	}
-
-	name := operatorPolicyId[0]
-	vhost := operatorPolicyId[1]
 
 	if d.HasChange("policy") {
 		_, newOperatorPolicy := d.GetChange("policy")
@@ -169,13 +163,10 @@ func UpdateOperatorPolicy(d *schema.ResourceData, meta interface{}) error {
 func DeleteOperatorPolicy(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	operatorPolicyId := strings.Split(d.Id(), "@")
-	if len(operatorPolicyId) < 2 {
-		return fmt.Errorf("Unable to determine operator policy ID")
+	name, vhost, err := parseResourceId(d)
+	if err != nil {
+		return err
 	}
-
-	name := operatorPolicyId[0]
-	vhost := operatorPolicyId[1]
 
 	log.Printf("[DEBUG] RabbitMQ: Attempting to delete operator policy for %s", d.Id())
 

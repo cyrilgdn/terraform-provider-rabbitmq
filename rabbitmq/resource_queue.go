@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/structure"
@@ -116,15 +115,12 @@ func CreateQueue(d *schema.ResourceData, meta interface{}) error {
 func ReadQueue(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	queueId := strings.Split(d.Id(), "@")
-	if len(queueId) < 2 {
-		return fmt.Errorf("Unable to determine Queue ID")
+	name, vhost, err := parseResourceId(d)
+	if err != nil {
+		return err
 	}
 
-	user := queueId[0]
-	vhost := queueId[1]
-
-	queueSettings, err := rmqc.GetQueue(vhost, user)
+	queueSettings, err := rmqc.GetQueue(vhost, name)
 	if err != nil {
 		return checkDeleted(d, err)
 	}
@@ -165,17 +161,14 @@ func ReadQueue(d *schema.ResourceData, meta interface{}) error {
 func DeleteQueue(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	queueId := strings.Split(d.Id(), "@")
-	if len(queueId) < 2 {
-		return fmt.Errorf("Unable to determine Queue ID")
+	name, vhost, err := parseResourceId(d)
+	if err != nil {
+		return err
 	}
-
-	user := queueId[0]
-	vhost := queueId[1]
 
 	log.Printf("[DEBUG] RabbitMQ: Attempting to delete queue for %s", d.Id())
 
-	resp, err := rmqc.DeleteQueue(vhost, user)
+	resp, err := rmqc.DeleteQueue(vhost, name)
 	log.Printf("[DEBUG] RabbitMQ: Queue delete response: %#v", resp)
 	if err != nil {
 		return err

@@ -3,7 +3,6 @@ package rabbitmq
 import (
 	"fmt"
 	"log"
-	"strings"
 
 	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
 
@@ -93,13 +92,10 @@ func CreateExchange(d *schema.ResourceData, meta interface{}) error {
 func ReadExchange(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	exchangeId := strings.Split(d.Id(), "@")
-	if len(exchangeId) < 2 {
-		return fmt.Errorf("Unable to determine exchange ID")
+	name, vhost, err := parseResourceId(d)
+	if err != nil {
+		return err
 	}
-
-	name := exchangeId[0]
-	vhost := exchangeId[1]
 
 	exchangeSettings, err := rmqc.GetExchange(vhost, name)
 	if err != nil {
@@ -126,13 +122,10 @@ func ReadExchange(d *schema.ResourceData, meta interface{}) error {
 func DeleteExchange(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	exchangeId := strings.Split(d.Id(), "@")
-	if len(exchangeId) < 2 {
-		return fmt.Errorf("Unable to determine exchange ID")
+	name, vhost, err := parseResourceId(d)
+	if err != nil {
+		return err
 	}
-
-	name := exchangeId[0]
-	vhost := exchangeId[1]
 
 	log.Printf("[DEBUG] RabbitMQ: Attempting to delete exchange %s", d.Id())
 
