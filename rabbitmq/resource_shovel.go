@@ -284,8 +284,10 @@ func ReadShovel(d *schema.ResourceData, meta interface{}) error {
 func UpdateShovel(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	vhost := d.Get("vhost").(string)
-	shovelName := d.Get("name").(string)
+	name, vhost, err := parseID(d)
+	if err != nil {
+		return err
+	}
 
 	if d.HasChange("info") {
 		_, newShovel := d.GetChange("info")
@@ -298,8 +300,8 @@ func UpdateShovel(d *schema.ResourceData, meta interface{}) error {
 
 		shovelDefinition := setShovelDefinition(infoMap).(rabbithole.ShovelDefinition)
 
-		log.Printf("[DEBUG] RabbitMQ: Attempting to declare shovel %s in vhost %s", shovelName, vhost)
-		resp, err := rmqc.DeclareShovel(vhost, shovelName, shovelDefinition)
+		log.Printf("[DEBUG] RabbitMQ: Attempting to declare shovel %s in vhost %s", name, vhost)
+		resp, err := rmqc.DeclareShovel(vhost, name, shovelDefinition)
 		log.Printf("[DEBUG] RabbitMQ: shovel declartion response: %#v", resp)
 		if err != nil {
 			return err
