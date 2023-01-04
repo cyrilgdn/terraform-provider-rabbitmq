@@ -26,6 +26,12 @@ func TestAccBinding_basic(t *testing.T) {
 					"rabbitmq_binding.test", &bindingInfo,
 				),
 			},
+			{
+				Config: testAccBindingConfig_basic,
+				Check: testAccBindingCheck(
+					"rabbitmq_binding.foo_to_bar", &bindingInfo,
+				),
+			},
 		},
 	})
 }
@@ -174,6 +180,26 @@ resource "rabbitmq_permissions" "guest" {
     }
 }
 
+resource "rabbitmq_exchange" "foo" {
+    name = "foo"
+    vhost = "${rabbitmq_permissions.guest.vhost}"
+    settings {
+        type = "fanout"
+        durable = false
+        auto_delete = true
+    }
+}
+
+resource "rabbitmq_exchange" "bar" {
+    name = "foo"
+    vhost = "${rabbitmq_permissions.guest.vhost}"
+    settings {
+        type = "fanout"
+        durable = false
+        auto_delete = true
+    }
+}
+
 resource "rabbitmq_exchange" "test" {
     name = "test"
     vhost = "${rabbitmq_permissions.guest.vhost}"
@@ -191,6 +217,14 @@ resource "rabbitmq_queue" "test" {
         durable = true
         auto_delete = false
     }
+}
+
+resource "rabbitmq_binding" "foo_to_bar" {
+    source = "${rabbitmq_exchange.foo.name}"
+    vhost = "${rabbitmq_vhost.test.name}"
+    destination = "${rabbitmq_exchange.bar.name}"
+    destination_type = "exchange"
+    routing_key = "#"
 }
 
 resource "rabbitmq_binding" "test" {

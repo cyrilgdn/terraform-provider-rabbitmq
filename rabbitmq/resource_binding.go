@@ -133,9 +133,23 @@ func ReadBinding(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[DEBUG] RabbitMQ: Attempting to find binding for: vhost=%s source=%s destination=%s destinationType=%s propertiesKey=%s",
 		vhost, source, destination, destinationType, propertiesKey)
 
-	bindings, err := rmqc.ListBindingsIn(vhost)
-	if err != nil {
-		return err
+	var bindings []rabbithole.BindingInfo
+	var err error
+	if destinationType == "queue" {
+		bindings, err = rmqc.ListQueueBindingsBetween(vhost, source, destination)
+		if err != nil {
+			return err
+		}
+	} else if destinationType == "exchange" {
+		bindings, err = rmqc.ListExchangeBindingsBetween(vhost, source, destination)
+		if err != nil {
+			return err
+		}
+	} else {
+		bindings, err = rmqc.ListBindingsIn(vhost)
+		if err != nil {
+			return err
+		}
 	}
 
 	log.Printf("[DEBUG] RabbitMQ: Bindings retrieved: %#v", bindings)
