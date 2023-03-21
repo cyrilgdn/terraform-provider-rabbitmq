@@ -109,7 +109,7 @@ func resourceShovel() *schema.Resource {
 							Default:  "amqp091",
 						},
 						"destination_publish_properties": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeMap,
 							Optional: true,
 							ForceNew: true,
 							Default:  nil,
