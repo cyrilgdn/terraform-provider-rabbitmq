@@ -109,7 +109,7 @@ func resourceShovel() *schema.Resource {
 							Default:  "amqp091",
 						},
 						"destination_publish_properties": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeMap,
 							Optional: true,
 							ForceNew: true,
 							Default:  nil,
@@ -379,7 +379,7 @@ func setShovelDefinition(shovelMap map[string]interface{}) interface{} {
 		shovelDefinition.DestinationProtocol = v
 	}
 
-	if v, ok := shovelMap["destination_publish_properties"].(string); ok {
+	if v, ok := shovelMap["destination_publish_properties"].(map[string]interface{}); ok {
 		shovelDefinition.DestinationPublishProperties = v
 	}
 
