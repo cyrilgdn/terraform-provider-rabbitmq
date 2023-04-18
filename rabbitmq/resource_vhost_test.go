@@ -37,6 +37,51 @@ func TestAccVhost(t *testing.T) {
 	})
 }
 
+func TestAccVhostDefaultQueue(t *testing.T) {
+	var vhost string
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccVhostCheckDestroy(vhost),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVhost_defaultQueue,
+				Check: testAccVhostWithDefaultQueueCheck(
+					"rabbitmq_vhost.test-with-default-queue", &vhost,
+				),
+			},
+		},
+	})
+}
+
+func testAccVhostWithDefaultQueueCheck(rn string, name *string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		rs, ok := s.RootModule().Resources[rn]
+		if !ok {
+			return fmt.Errorf("resource not found: %s", rn)
+		}
+
+		if rs.Primary.ID == "" {
+			return fmt.Errorf("vhost id not set")
+		}
+
+		rmqc := testAccProvider.Meta().(*rabbithole.Client)
+		vhosts, err := rmqc.ListVhosts()
+		if err != nil {
+			return fmt.Errorf("Error retrieving vhosts: %s", err)
+		}
+
+		for _, vhost := range vhosts {
+			if vhost.Name == rs.Primary.ID && vhost.DefaultQueueType == "quorum" {
+				*name = rs.Primary.ID
+				return nil
+			}
+		}
+
+		return fmt.Errorf("Unable to find vhost %s", rn)
+	}
+}
+
 func forceDropVhost(vhost *string) func() {
 	return func() {
 		rmqc := testAccProvider.Meta().(*rabbithole.Client)
@@ -102,4 +147,10 @@ func testAccVhostCheckDestroy(name string) resource.TestCheckFunc {
 const testAccVhostConfig_basic = `
 resource "rabbitmq_vhost" "test" {
     name = "test"
+}`
+
+const testAccVhost_defaultQueue = `
+resource "rabbitmq_vhost" "default_queue_set" {
+	name = "test-with-default-queue"
+	default_queue_type = "quorum"
 }`

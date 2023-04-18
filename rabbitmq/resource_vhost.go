@@ -24,6 +24,11 @@ func resourceVhost() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"default_queue_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 		},
 	}
 }
@@ -35,7 +40,13 @@ func CreateVhost(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] RabbitMQ: Attempting to create vhost %s", vhost)
 
-	resp, err := rmqc.PutVhost(vhost, rabbithole.VhostSettings{})
+	var settings rabbithole.VhostSettings
+
+	if v, ok := d.Get("default_queue_type").(string); ok && v != "" {
+		settings.DefaultQueueType = v
+	}
+
+	resp, err := rmqc.PutVhost(vhost, settings)
 	log.Printf("[DEBUG] RabbitMQ: vhost creation response: %#v", resp)
 	if err != nil {
 		return err
