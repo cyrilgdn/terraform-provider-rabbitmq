@@ -15,6 +15,7 @@ The ``rabbitmq_vhost`` resource creates and manages a vhost.
 ```hcl
 resource "rabbitmq_vhost" "my_vhost" {
   name = "my_vhost"
+  default_queue_type = "quorum"
 }
 ```
 
@@ -23,6 +24,8 @@ resource "rabbitmq_vhost" "my_vhost" {
 The following arguments are supported:
 
 * `name` - (Required) The name of the vhost.
+
+* `default_queue_type` - (Optional) Default queue type for newly created queues in vhost. Possible values are: `classic`, `quorum`, or `stream`. Defaults to `classic`.
 
 ## Attributes Reference
 
