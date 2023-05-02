@@ -54,7 +54,7 @@ The following arguments are supported:
   This can also be sourced from the `RABBITMQ_USERNAME` Environment Variable.
 * `password` - (Optional) Password for the given user. This can also be sourced
   from the `RABBITMQ_PASSWORD` Environment Variable.
-* `insecure` - (Optional) Trust self-signed certificates. This can also be sourced
+* `insecure` - (Optional) Boolean. Trust self-signed certificates. This can also be sourced
   from the `RABBITMQ_INSECURE` Environment Variable.
 * `cacert_file` - (Optional) The path to a custom CA / intermediate certificate.
   This can also be sourced from the `RABBITMQ_CACERT` Environment Variable.

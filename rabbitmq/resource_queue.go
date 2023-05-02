@@ -82,6 +82,13 @@ func CreateQueue(d *schema.ResourceData, meta interface{}) error {
 
 	name := d.Get("name").(string)
 	vhost := d.Get("vhost").(string)
+
+	// Check if already exists
+	_, not_found := rmqc.GetQueue(vhost, name)
+	if not_found == nil {
+		return fmt.Errorf("Error creating RabbitMQ queue '%s': queue already exists", name)
+	}
+
 	settingsList := d.Get("settings").([]interface{})
 
 	settingsMap, ok := settingsList[0].(map[string]interface{})
@@ -180,7 +187,7 @@ func DeleteQueue(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error deleting RabbitMQ queue: %s", resp.Status)
+		return fmt.Errorf("Error deleting RabbitMQ queue '%s': %s", name, resp.Status)
 	}
 
 	return nil
@@ -210,7 +217,7 @@ func declareQueue(rmqc *rabbithole.Client, vhost string, name string, settingsMa
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error declaring RabbitMQ queue: %s", resp.Status)
+		return fmt.Errorf("Error declaring RabbitMQ queue '%s': %s", name, resp.Status)
 	}
 
 	return nil

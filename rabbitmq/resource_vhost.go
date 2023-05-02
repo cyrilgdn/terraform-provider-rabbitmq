@@ -35,6 +35,12 @@ func CreateVhost(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] RabbitMQ: Attempting to create vhost %s", vhost)
 
+	// Check if already exists
+	_, not_found := rmqc.GetVhost(vhost)
+	if not_found == nil {
+		return fmt.Errorf("Error creating RabbitMQ vhost '%s': vhost already exists", vhost)
+	}
+
 	resp, err := rmqc.PutVhost(vhost, rabbithole.VhostSettings{})
 	log.Printf("[DEBUG] RabbitMQ: vhost creation response: %#v", resp)
 	if err != nil {
@@ -78,7 +84,7 @@ func DeleteVhost(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error deleting RabbitMQ user: %s", resp.Status)
+		return fmt.Errorf("Error deleting RabbitMQ vhost '%s': %s", d.Id(), resp.Status)
 	}
 
 	return nil

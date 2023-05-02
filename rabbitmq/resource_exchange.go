@@ -72,6 +72,13 @@ func CreateExchange(d *schema.ResourceData, meta interface{}) error {
 
 	name := d.Get("name").(string)
 	vhost := d.Get("vhost").(string)
+
+	// Check if already exists
+	_, not_found := rmqc.GetExchange(vhost, name)
+	if not_found == nil {
+		return fmt.Errorf("Error creating RabbitMQ exchange '%s': exchange already exists", name)
+	}
+
 	settingsList := d.Get("settings").([]interface{})
 
 	settingsMap, ok := settingsList[0].(map[string]interface{})
@@ -141,7 +148,7 @@ func DeleteExchange(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error deleting RabbitMQ exchange: %s", resp.Status)
+		return fmt.Errorf("Error deleting RabbitMQ exchange '%s': %s", name, resp.Status)
 	}
 
 	return nil
@@ -175,7 +182,7 @@ func declareExchange(rmqc *rabbithole.Client, vhost string, name string, setting
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error declaring RabbitMQ exchange: %s", resp.Status)
+		return fmt.Errorf("Error declaring RabbitMQ exchange '%s': %s", name, resp.Status)
 	}
 
 	return nil

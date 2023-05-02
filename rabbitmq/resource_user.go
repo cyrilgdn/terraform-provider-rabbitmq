@@ -53,6 +53,12 @@ func CreateUser(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] RabbitMQ: Attempting to create user %s", name)
 
+	// Check if already exists
+	_, not_found := rmqc.GetUser(name)
+	if not_found == nil {
+		return fmt.Errorf("Error creating RabbitMQ user '%s': user already exists", name)
+	}
+
 	resp, err := rmqc.PutUser(name, userSettings)
 	log.Printf("[DEBUG] RabbitMQ: user creation response: %#v", resp)
 	if err != nil {
@@ -140,7 +146,7 @@ func DeleteUser(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error deleting RabbitMQ user: %s", resp.Status)
+		return fmt.Errorf("Error deleting RabbitMQ user '%s': %s", name, resp.Status)
 	}
 
 	return nil
