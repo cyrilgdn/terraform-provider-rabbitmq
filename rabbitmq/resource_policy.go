@@ -190,7 +190,7 @@ func DeletePolicy(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error deleting RabbitMQ policy: %s", resp.Status)
+		return fmt.Errorf("Error deleting RabbitMQ policy '%s': %s", name, resp.Status)
 	}
 
 	return nil
@@ -244,7 +244,7 @@ func putPolicy(rmqc *rabbithole.Client, vhost string, name string, policyMap map
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error declaring RabbitMQ policy: %s", resp.Status)
+		return fmt.Errorf("Error declaring RabbitMQ policy '%s': %s", name, resp.Status)
 	}
 
 	return nil

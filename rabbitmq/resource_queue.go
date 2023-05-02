@@ -187,7 +187,7 @@ func DeleteQueue(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error deleting RabbitMQ queue: %s", resp.Status)
+		return fmt.Errorf("Error deleting RabbitMQ queue '%s': %s", name, resp.Status)
 	}
 
 	return nil
@@ -217,7 +217,7 @@ func declareQueue(rmqc *rabbithole.Client, vhost string, name string, settingsMa
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error declaring RabbitMQ queue: %s", resp.Status)
+		return fmt.Errorf("Error declaring RabbitMQ queue '%s': %s", name, resp.Status)
 	}
 
 	return nil

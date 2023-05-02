@@ -148,7 +148,7 @@ func DeleteExchange(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error deleting RabbitMQ exchange: %s", resp.Status)
+		return fmt.Errorf("Error deleting RabbitMQ exchange '%s': %s", name, resp.Status)
 	}
 
 	return nil
@@ -182,7 +182,7 @@ func declareExchange(rmqc *rabbithole.Client, vhost string, name string, setting
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error declaring RabbitMQ exchange: %s", resp.Status)
+		return fmt.Errorf("Error declaring RabbitMQ exchange '%s': %s", name, resp.Status)
 	}
 
 	return nil

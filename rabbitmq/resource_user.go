@@ -146,7 +146,7 @@ func DeleteUser(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error deleting RabbitMQ user: %s", resp.Status)
+		return fmt.Errorf("Error deleting RabbitMQ user '%s': %s", name, resp.Status)
 	}
 
 	return nil
