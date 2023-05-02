@@ -71,6 +71,13 @@ func CreatePolicy(d *schema.ResourceData, meta interface{}) error {
 
 	name := d.Get("name").(string)
 	vhost := d.Get("vhost").(string)
+
+	// Check if already exists
+	_, not_found := rmqc.GetPolicy(vhost, name)
+	if not_found == nil {
+		return fmt.Errorf("Error creating RabbitMQ policy '%s': policy already exists", name)
+	}
+
 	policyList := d.Get("policy").([]interface{})
 
 	policyMap, ok := policyList[0].(map[string]interface{})

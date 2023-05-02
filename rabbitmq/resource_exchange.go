@@ -72,6 +72,13 @@ func CreateExchange(d *schema.ResourceData, meta interface{}) error {
 
 	name := d.Get("name").(string)
 	vhost := d.Get("vhost").(string)
+
+	// Check if already exists
+	_, not_found := rmqc.GetExchange(vhost, name)
+	if not_found == nil {
+		return fmt.Errorf("Error creating RabbitMQ exchange '%s': exchange already exists", name)
+	}
+
 	settingsList := d.Get("settings").([]interface{})
 
 	settingsMap, ok := settingsList[0].(map[string]interface{})
