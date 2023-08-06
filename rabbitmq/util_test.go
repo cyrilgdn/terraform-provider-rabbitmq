@@ -2,7 +2,7 @@ package rabbitmq
 
 import "testing"
 
-func TestParseId(t *testing.T) {
+func TestParseVHostResourceIdString(t *testing.T) {
 	var badInputs = []string{
 		"",
 		"foo/test",
@@ -11,7 +11,7 @@ func TestParseId(t *testing.T) {
 	}
 
 	for _, input := range badInputs {
-		_, _, err := parseId(input)
+		_, _, err := parseVHostResourceIdString(input)
 		if err == nil {
 			t.Errorf("parseId failed for: %s.", input)
 		}
@@ -25,10 +25,13 @@ func TestParseId(t *testing.T) {
 		{"foo@test", "foo", "test"},
 		{"foo@/", "foo", "/"},
 		{"foo/bar/baz@/", "foo/bar/baz", "/"},
+		{"foo%40bar@test", "foo@bar", "test"},
+		{"foo@bar%40test", "foo", "bar@test"},
+		{"foo%40bar@my%40test", "foo@bar", "my@test"},
 	}
 
 	for _, test := range goodInputs {
-		name, vhost, err := parseId(test.input)
+		name, vhost, err := parseVHostResourceIdString(test.input)
 		if err != nil || name != test.name || vhost != test.vhost {
 			t.Errorf("parseId failed for: %s.", test.input)
 		}

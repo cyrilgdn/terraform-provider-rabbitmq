@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"regexp"
-	"strings"
 	"testing"
 
 	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
@@ -61,9 +60,9 @@ func testAccTopicPermissionsCheck(rn string, topicPermissionInfo *rabbithole.Top
 			return fmt.Errorf("Error retrieving topic permissions: %s", err)
 		}
 
-		userParts := strings.Split(rs.Primary.ID, "@")
+		name, vhost, err := parseVHostResourceIdString(rs.Primary.ID)
 		for _, perm := range perms {
-			if perm.User == userParts[0] && perm.Vhost == userParts[1] {
+			if perm.User == name && perm.Vhost == vhost {
 				topicPermissionInfo = &perm
 				return nil
 			}

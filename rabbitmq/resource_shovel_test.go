@@ -2,7 +2,6 @@ package rabbitmq
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -46,7 +45,7 @@ func testAccShovelCheck(rn string, shovelInfo *rabbithole.ShovelInfo) resource.T
 		}
 
 		rmqc := testAccProvider.Meta().(*rabbithole.Client)
-		shovelParts := strings.Split(rs.Primary.ID, "@")
+		name, vhost, err := parseVHostResourceIdString(rs.Primary.ID)
 
 		shovelInfos, err := rmqc.ListShovels()
 		if err != nil {
@@ -54,7 +53,7 @@ func testAccShovelCheck(rn string, shovelInfo *rabbithole.ShovelInfo) resource.T
 		}
 
 		for _, info := range shovelInfos {
-			if info.Name == shovelParts[0] && info.Vhost == shovelParts[1] {
+			if info.Name == name && info.Vhost == vhost {
 				expectedSourceExchange := rs.Primary.Attributes["info.0.source_exchange"]
 				expectedSourceExchangeKey := rs.Primary.Attributes["info.0.source_exchange_key"]
 				expectedSourceUri := rs.Primary.Attributes["info.0.source_uri"]

@@ -2,7 +2,6 @@ package rabbitmq
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
@@ -11,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccPermissions(t *testing.T) {
+func TestAccPermissions_basic(t *testing.T) {
 	var permissionInfo rabbithole.PermissionInfo
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -34,7 +33,24 @@ func TestAccPermissions(t *testing.T) {
 	})
 }
 
-func TestAccPermissions_Empty(t *testing.T) {
+func TestAccPermissions_atSymbolEscaping(t *testing.T) {
+	var permissionInfo rabbithole.PermissionInfo
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccPermissionsCheckDestroy(&permissionInfo),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccPermissionsConfig_atSymbolsAreOk,
+				Check: testAccPermissionsCheck(
+					"rabbitmq_permissions.test", &permissionInfo,
+				),
+			},
+		},
+	})
+}
+
+func TestAccPermissions_empty(t *testing.T) {
 
 	configCreate := `
 resource "rabbitmq_vhost" "test" {
@@ -88,9 +104,9 @@ func testAccPermissionsCheck(rn string, permissionInfo *rabbithole.PermissionInf
 			return fmt.Errorf("Error retrieving permissions: %s", err)
 		}
 
-		userParts := strings.Split(rs.Primary.ID, "@")
+		name, vhost, err := parseVHostResourceIdString(rs.Primary.ID)
 		for _, perm := range perms {
-			if perm.User == userParts[0] && perm.Vhost == userParts[1] {
+			if perm.User == name && perm.Vhost == vhost {
 				permissionInfo = &perm
 				return nil
 			}
@@ -157,5 +173,26 @@ resource "rabbitmq_permissions" "test" {
         configure = ".*"
         write = ".*"
         read = ""
+    }
+}`
+
+const testAccPermissionsConfig_atSymbolsAreOk = `
+resource "rabbitmq_vhost" "test" {
+    name = "test"
+}
+
+resource "rabbitmq_user" "test" {
+    name = "someone@test"
+    password = "foobar"
+    tags = ["administrator"]
+}
+
+resource "rabbitmq_permissions" "test" {
+    user = "${rabbitmq_user.test.name}"
+    vhost = "${rabbitmq_vhost.test.name}"
+    permissions {
+        configure = ".*"
+        write = ".*"
+        read = ".*"
     }
 }`

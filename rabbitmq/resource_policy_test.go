@@ -2,7 +2,6 @@ package rabbitmq
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
@@ -46,7 +45,7 @@ func testAccPolicyCheck(rn string, policy *rabbithole.Policy) resource.TestCheck
 		}
 
 		rmqc := testAccProvider.Meta().(*rabbithole.Client)
-		policyParts := strings.Split(rs.Primary.ID, "@")
+		name, vhost, err := parseVHostResourceIdString(rs.Primary.ID)
 
 		policies, err := rmqc.ListPolicies()
 		if err != nil {
@@ -54,7 +53,7 @@ func testAccPolicyCheck(rn string, policy *rabbithole.Policy) resource.TestCheck
 		}
 
 		for _, p := range policies {
-			if p.Name == policyParts[0] && p.Vhost == policyParts[1] {
+			if p.Name == name && p.Vhost == vhost {
 				policy = &p
 				return nil
 			}

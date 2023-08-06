@@ -2,7 +2,6 @@ package rabbitmq
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
@@ -11,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccExchange(t *testing.T) {
+func TestAccExchange_basic(t *testing.T) {
 	var exchangeInfo rabbithole.ExchangeInfo
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -20,6 +19,23 @@ func TestAccExchange(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccExchangeConfig_basic,
+				Check: testAccExchangeCheck(
+					"rabbitmq_exchange.test", &exchangeInfo,
+				),
+			},
+		},
+	})
+}
+
+func TestAccExchange_atSymbolEscaping(t *testing.T) {
+	var exchangeInfo rabbithole.ExchangeInfo
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccExchangeCheckDestroy(&exchangeInfo),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccExchangeConfig_atSymbolsAreOk,
 				Check: testAccExchangeCheck(
 					"rabbitmq_exchange.test", &exchangeInfo,
 				),
@@ -40,15 +56,15 @@ func testAccExchangeCheck(rn string, exchangeInfo *rabbithole.ExchangeInfo) reso
 		}
 
 		rmqc := testAccProvider.Meta().(*rabbithole.Client)
-		exchParts := strings.Split(rs.Primary.ID, "@")
+		name, vhost, err := parseVHostResourceIdString(rs.Primary.ID)
 
-		exchanges, err := rmqc.ListExchangesIn(exchParts[1])
+		exchanges, err := rmqc.ListExchangesIn(vhost)
 		if err != nil {
 			return fmt.Errorf("Error retrieving exchange: %s", err)
 		}
 
 		for _, exchange := range exchanges {
-			if exchange.Name == exchParts[0] && exchange.Vhost == exchParts[1] {
+			if exchange.Name == name && exchange.Vhost == vhost {
 				exchangeInfo = &exchange
 				return nil
 			}
@@ -94,6 +110,31 @@ resource "rabbitmq_permissions" "guest" {
 
 resource "rabbitmq_exchange" "test" {
     name = "test"
+    vhost = "${rabbitmq_permissions.guest.vhost}"
+    settings {
+        type = "fanout"
+        durable = false
+        auto_delete = true
+    }
+}`
+
+const testAccExchangeConfig_atSymbolsAreOk = `
+resource "rabbitmq_vhost" "test" {
+    name = "foo@test"
+}
+
+resource "rabbitmq_permissions" "guest" {
+    user = "guest"
+    vhost = "${rabbitmq_vhost.test.name}"
+    permissions {
+        configure = ".*"
+        write = ".*"
+        read = ".*"
+    }
+}
+
+resource "rabbitmq_exchange" "test" {
+    name = "bar@exchange"
     vhost = "${rabbitmq_permissions.guest.vhost}"
     settings {
         type = "fanout"
