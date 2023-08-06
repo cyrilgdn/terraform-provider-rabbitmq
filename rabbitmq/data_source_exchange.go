@@ -2,7 +2,6 @@ package rabbitmq
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
@@ -68,7 +67,7 @@ func dataSourcesReadExchange(ctx context.Context, d *schema.ResourceData, meta i
 
 	name := d.Get("name").(string)
 	vhost := d.Get("vhost").(string)
-	id := fmt.Sprintf("%s@%s", name, vhost)
+	id := buildVHostResourceId(name, vhost)
 
 	exchangeSettings, err := rmqc.GetExchange(vhost, name)
 	if err != nil {

@@ -82,7 +82,7 @@ func CreatePolicy(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	id := fmt.Sprintf("%s@%s", name, vhost)
+	id := buildVHostResourceId(name, vhost)
 	d.SetId(id)
 
 	return ReadPolicy(d, meta)
@@ -91,7 +91,7 @@ func CreatePolicy(d *schema.ResourceData, meta interface{}) error {
 func ReadPolicy(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	name, vhost, err := parseResourceId(d)
+	name, vhost, err := parseVHostResourceId(d)
 	if err != nil {
 		return err
 	}
@@ -139,7 +139,7 @@ func ReadPolicy(d *schema.ResourceData, meta interface{}) error {
 func UpdatePolicy(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	name, vhost, err := parseResourceId(d)
+	name, vhost, err := parseVHostResourceId(d)
 	if err != nil {
 		return err
 	}
@@ -164,7 +164,7 @@ func UpdatePolicy(d *schema.ResourceData, meta interface{}) error {
 func DeletePolicy(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	name, vhost, err := parseResourceId(d)
+	name, vhost, err := parseVHostResourceId(d)
 	if err != nil {
 		return err
 	}

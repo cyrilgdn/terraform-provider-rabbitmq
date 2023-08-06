@@ -128,7 +128,7 @@ func CreateFederationUpstream(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	id := fmt.Sprintf("%s@%s", name, vhost)
+	id := buildVHostResourceId(name, vhost)
 	d.SetId(id)
 
 	return ReadFederationUpstream(d, meta)
@@ -137,7 +137,7 @@ func CreateFederationUpstream(d *schema.ResourceData, meta interface{}) error {
 func ReadFederationUpstream(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	name, vhost, err := parseResourceId(d)
+	name, vhost, err := parseVHostResourceId(d)
 	if err != nil {
 		return err
 	}
@@ -179,7 +179,7 @@ func ReadFederationUpstream(d *schema.ResourceData, meta interface{}) error {
 func UpdateFederationUpstream(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	name, vhost, err := parseResourceId(d)
+	name, vhost, err := parseVHostResourceId(d)
 	if err != nil {
 		return err
 	}
@@ -204,7 +204,7 @@ func UpdateFederationUpstream(d *schema.ResourceData, meta interface{}) error {
 func DeleteFederationUpstream(d *schema.ResourceData, meta interface{}) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	name, vhost, err := parseResourceId(d)
+	name, vhost, err := parseVHostResourceId(d)
 	if err != nil {
 		return err
 	}
