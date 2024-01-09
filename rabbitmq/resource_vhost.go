@@ -85,11 +85,19 @@ func CreateVhost(d *schema.ResourceData, meta interface{}) error {
 	limits := make(rabbithole.VhostLimitsValues)
 
 	if v, ok := d.GetOk("max_connections"); ok {
-		limits["max-connections"] = v.(int)
+		v_int, err := strconv.Atoi(v.(string))
+		if err != nil {
+			log.Printf("[ERROR] RabbitMQ: Error converting max_connections to int: %#v", err)
+		}
+		limits["max-connections"] = v_int
 	}
 
 	if v, ok := d.GetOk("max_queues"); ok {
-		limits["max-queues"] = v.(int)
+		v_int, err := strconv.Atoi(v.(string))
+		if err != nil {
+			log.Printf("[ERROR] RabbitMQ: Error converting max_queues to int: %#v", err)
+		}
+		limits["max-queues"] = v_int
 	}
 
 	resp, err := rmqc.PutVhost(vhost, settings)

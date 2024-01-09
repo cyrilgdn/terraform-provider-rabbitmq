@@ -102,4 +102,8 @@ func testAccVhostCheckDestroy(name string) resource.TestCheckFunc {
 const testAccVhostConfig_basic = `
 resource "rabbitmq_vhost" "test" {
     name = "test"
+	description = "test description"
+	tracing = true
+	max_connections = 100
+	max_queues = 200
 }`
