@@ -78,7 +78,7 @@ func resourceShovel() *schema.Resource {
 							Default:  nil,
 						},
 						"destination_application_properties": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeMap,
 							Optional: true,
 							ForceNew: true,
 							Default:  nil,
