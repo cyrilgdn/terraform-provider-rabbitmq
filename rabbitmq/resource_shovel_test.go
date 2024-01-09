@@ -146,6 +146,13 @@ resource "rabbitmq_shovel" "shovelTest" {
 		source_exchange_key = "test"
 		destination_uri = "amqp:///test"
 		destination_queue = "${rabbitmq_queue.test.name}"
+		destination_publish_properties = {
+			reply_to = "test2.local"
+			correlation_id = "gfdgdfgdfg"
+		}
+		destination_queue_arguments = {
+			x-queue-type = "classic"
+		}
 	}
 }`
 
