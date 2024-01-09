@@ -3,6 +3,7 @@ package rabbitmq
 import (
 	"fmt"
 	"log"
+	"strconv"
 
 	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
 
@@ -47,12 +48,12 @@ func resourceVhost() *schema.Resource {
 				ForceNew: false,
 			},
 			"max_connections": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 			},
 			"max_queues": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: false,
 			},
@@ -156,10 +157,14 @@ func UpdateVhost(d *schema.ResourceData, meta interface{}) error {
 
 	if _, ok := d.GetOk("max_connections"); ok {
 		if d.HasChange("max_connections") {
+
 			_, newMaxConnections := d.GetChange("max_connections")
 
-			if v, ok := newMaxConnections.(int); ok {
-				limits["max-connections"] = v
+			if v, ok := newMaxConnections.(string); ok {
+				limits["max-connections"], err = strconv.Atoi(v)
+				if err != nil {
+					log.Printf("[ERROR] RabbitMQ: Error converting max_connections to int: %#v", err)
+				}
 			}
 		} else {
 			limits["max-connections"] = vhost_limits_info[0].Value["max-connections"]
@@ -170,8 +175,11 @@ func UpdateVhost(d *schema.ResourceData, meta interface{}) error {
 		if d.HasChange("max_queues") {
 			_, newMaxQueues := d.GetChange("max_queues")
 
-			if v, ok := newMaxQueues.(int); ok {
-				limits["max-queues"] = v
+			if v, ok := newMaxQueues.(string); ok {
+				limits["max-queues"], err = strconv.Atoi(v)
+				if err != nil {
+					log.Printf("[ERROR] RabbitMQ: Error converting max_queues to int: %#v", err)
+				}
 			}
 		} else {
 			limits["max-queues"] = vhost_limits_info[0].Value["max-queues"]
@@ -222,18 +230,18 @@ func ReadVhost(d *schema.ResourceData, meta interface{}) error {
 	d.Set("tracing", vhost.Tracing)
 
 	if len(vhost_limits_info) > 0 {
+
 		if val, ok := vhost_limits_info[0].Value["max-connections"]; ok {
-			if val > -1 {
-				d.Set("max_connections", val)
-			}
+			d.Set("max_connections", strconv.Itoa(val))
+		} else {
+			d.Set("max_connections", "") // set as unlimited
 		}
 
 		if val, ok := vhost_limits_info[0].Value["max-queues"]; ok {
-			if val > -1 {
-				d.Set("max_queues", val)
-			}
+			d.Set("max_queues", strconv.Itoa(val))
+		} else {
+			d.Set("max_queues", "") // set as unlimited
 		}
-
 	}
 
 	return nil
