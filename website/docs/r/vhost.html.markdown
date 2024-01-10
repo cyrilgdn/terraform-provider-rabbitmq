@@ -28,7 +28,7 @@ resource "rabbitmq_vhost" "my_vhost" {
 The following arguments are supported:
 
 * `name` - (Required) The name of the vhost.
-* `description` - (Optional) A freindly description.
+* `description` - (Optional) A friendly description.
 * `default_queue_type` - (Optional) default queue type for new queues
 * `max_connections` - (Optional) Maximum number of concurrent client connections to the vhost
 * `max_queues` - (Optional) Maximum number of queues that can be created on the vhost
