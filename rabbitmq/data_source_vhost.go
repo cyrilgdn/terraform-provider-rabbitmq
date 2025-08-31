@@ -26,7 +26,7 @@ func dataSourcesVhost() *schema.Resource {
 	}
 }
 
-func dataSourcesReadVhost(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourcesReadVhost(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	rmqc := meta.(*rabbithole.Client)

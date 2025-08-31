@@ -112,16 +112,16 @@ func resourceFederationUpstream() *schema.Resource {
 	}
 }
 
-func CreateFederationUpstream(d *schema.ResourceData, meta interface{}) error {
+func CreateFederationUpstream(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	name := d.Get("name").(string)
 	vhost := d.Get("vhost").(string)
-	defList := d.Get("definition").([]interface{})
+	defList := d.Get("definition").([]any)
 
-	defMap, ok := defList[0].(map[string]interface{})
+	defMap, ok := defList[0].(map[string]any)
 	if !ok {
-		return fmt.Errorf("Unable to parse federation upstream definition")
+		return fmt.Errorf("unable to parse federation upstream definition")
 	}
 
 	if err := putFederationUpstream(rmqc, vhost, name, defMap); err != nil {
@@ -134,7 +134,7 @@ func CreateFederationUpstream(d *schema.ResourceData, meta interface{}) error {
 	return ReadFederationUpstream(d, meta)
 }
 
-func ReadFederationUpstream(d *schema.ResourceData, meta interface{}) error {
+func ReadFederationUpstream(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	name, vhost, err := parseResourceId(d)
@@ -157,7 +157,7 @@ func ReadFederationUpstream(d *schema.ResourceData, meta interface{}) error {
 	if len(upstream.Definition.Uri) > 0 {
 		uri = upstream.Definition.Uri[0]
 	}
-	defMap := map[string]interface{}{
+	defMap := map[string]any{
 		"uri":             uri,
 		"prefetch_count":  upstream.Definition.PrefetchCount,
 		"reconnect_delay": upstream.Definition.ReconnectDelay,
@@ -170,13 +170,13 @@ func ReadFederationUpstream(d *schema.ResourceData, meta interface{}) error {
 		"queue":           upstream.Definition.Queue,
 	}
 
-	defList := [1]map[string]interface{}{defMap}
+	defList := [1]map[string]any{defMap}
 	d.Set("definition", defList)
 
 	return nil
 }
 
-func UpdateFederationUpstream(d *schema.ResourceData, meta interface{}) error {
+func UpdateFederationUpstream(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	name, vhost, err := parseResourceId(d)
@@ -187,10 +187,10 @@ func UpdateFederationUpstream(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("definition") {
 		_, newDef := d.GetChange("definition")
 
-		defList := newDef.([]interface{})
-		defMap, ok := defList[0].(map[string]interface{})
+		defList := newDef.([]any)
+		defMap, ok := defList[0].(map[string]any)
 		if !ok {
-			return fmt.Errorf("Unable to parse federation definition")
+			return fmt.Errorf("unable to parse federation definition")
 		}
 
 		if err := putFederationUpstream(rmqc, vhost, name, defMap); err != nil {
@@ -201,7 +201,7 @@ func UpdateFederationUpstream(d *schema.ResourceData, meta interface{}) error {
 	return ReadFederationUpstream(d, meta)
 }
 
-func DeleteFederationUpstream(d *schema.ResourceData, meta interface{}) error {
+func DeleteFederationUpstream(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	name, vhost, err := parseResourceId(d)
@@ -223,13 +223,13 @@ func DeleteFederationUpstream(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error deleting RabbitMQ federation upstream: %s", resp.Status)
+		return fmt.Errorf("error deleting RabbitMQ federation upstream: %s", resp.Status)
 	}
 
 	return nil
 }
 
-func putFederationUpstream(rmqc *rabbithole.Client, vhost string, name string, defMap map[string]interface{}) error {
+func putFederationUpstream(rmqc *rabbithole.Client, vhost string, name string, defMap map[string]any) error {
 	definition := rabbithole.FederationDefinition{}
 
 	log.Printf("[DEBUG] RabbitMQ: Attempting to put federation definition for %s@%s: %#v", name, vhost, defMap)
@@ -283,7 +283,7 @@ func putFederationUpstream(rmqc *rabbithole.Client, vhost string, name string, d
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error creating RabbitMQ federation upstream: %s", resp.Status)
+		return fmt.Errorf("error creating RabbitMQ federation upstream: %s", resp.Status)
 	}
 
 	return nil

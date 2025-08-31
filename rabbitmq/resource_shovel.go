@@ -206,16 +206,16 @@ func resourceShovel() *schema.Resource {
 	}
 }
 
-func CreateShovel(d *schema.ResourceData, meta interface{}) error {
+func CreateShovel(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	vhost := d.Get("vhost").(string)
 	shovelName := d.Get("name").(string)
-	shovelInfo := d.Get("info").([]interface{})
+	shovelInfo := d.Get("info").([]any)
 
-	shovelMap, ok := shovelInfo[0].(map[string]interface{})
+	shovelMap, ok := shovelInfo[0].(map[string]any)
 	if !ok {
-		return fmt.Errorf("Unable to parse shovel info")
+		return fmt.Errorf("unable to parse shovel info")
 	}
 
 	shovelDefinition := setShovelDefinition(shovelMap).(rabbithole.ShovelDefinition)
@@ -234,7 +234,7 @@ func CreateShovel(d *schema.ResourceData, meta interface{}) error {
 	return ReadShovel(d, meta)
 }
 
-func ReadShovel(d *schema.ResourceData, meta interface{}) error {
+func ReadShovel(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	name, vhost, err := parseResourceId(d)
@@ -249,7 +249,7 @@ func ReadShovel(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] RabbitMQ: Shovel retrieved: Vhost: %#v, Name: %#v", vhost, name)
 
-	info := make(map[string]interface{})
+	info := make(map[string]any)
 	info["ack_mode"] = shovelInfo.Definition.AckMode
 	info["add_forward_headers"] = shovelInfo.Definition.AddForwardHeaders
 	info["delete_after"] = shovelInfo.Definition.DeleteAfter
@@ -282,12 +282,12 @@ func ReadShovel(d *schema.ResourceData, meta interface{}) error {
 
 	d.Set("name", shovelInfo.Name)
 	d.Set("vhost", shovelInfo.Vhost)
-	d.Set("info", []map[string]interface{}{info})
+	d.Set("info", []map[string]any{info})
 
 	return nil
 }
 
-func UpdateShovel(d *schema.ResourceData, meta interface{}) error {
+func UpdateShovel(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	name, vhost, err := parseResourceId(d)
@@ -298,10 +298,10 @@ func UpdateShovel(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("info") {
 		_, newShovel := d.GetChange("info")
 
-		newShovelList := newShovel.([]interface{})
-		infoMap, ok := newShovelList[0].(map[string]interface{})
+		newShovelList := newShovel.([]any)
+		infoMap, ok := newShovelList[0].(map[string]any)
 		if !ok {
-			return fmt.Errorf("Unable to parse shovel info")
+			return fmt.Errorf("unable to parse shovel info")
 		}
 
 		shovelDefinition := setShovelDefinition(infoMap).(rabbithole.ShovelDefinition)
@@ -316,7 +316,7 @@ func UpdateShovel(d *schema.ResourceData, meta interface{}) error {
 	return ReadShovel(d, meta)
 }
 
-func DeleteShovel(d *schema.ResourceData, meta interface{}) error {
+func DeleteShovel(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	name, vhost, err := parseResourceId(d)
@@ -333,13 +333,13 @@ func DeleteShovel(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error deleting RabbitMQ shovel: %s", resp.Status)
+		return fmt.Errorf("error deleting RabbitMQ shovel: %s", resp.Status)
 	}
 
 	return nil
 }
 
-func setShovelDefinition(shovelMap map[string]interface{}) interface{} {
+func setShovelDefinition(shovelMap map[string]any) interface{} {
 	shovelDefinition := &rabbithole.ShovelDefinition{}
 
 	if v, ok := shovelMap["ack_mode"].(string); ok {

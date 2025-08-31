@@ -77,22 +77,22 @@ func resourceQueue() *schema.Resource {
 	}
 }
 
-func CreateQueue(d *schema.ResourceData, meta interface{}) error {
+func CreateQueue(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	name := d.Get("name").(string)
 	vhost := d.Get("vhost").(string)
-	settingsList := d.Get("settings").([]interface{})
+	settingsList := d.Get("settings").([]any)
 
-	settingsMap, ok := settingsList[0].(map[string]interface{})
+	settingsMap, ok := settingsList[0].(map[string]any)
 	if !ok {
-		return fmt.Errorf("Unable to parse settings")
+		return fmt.Errorf("unable to parse settings")
 	}
 
 	// If arguments_json is used, unmarshal it into a generic interface
 	// and use it as the "arguments" key for the queue.
 	if v, ok := settingsMap["arguments_json"].(string); ok && v != "" {
-		var arguments map[string]interface{}
+		var arguments map[string]any
 		err := json.Unmarshal([]byte(v), &arguments)
 		if err != nil {
 			return err
@@ -112,7 +112,7 @@ func CreateQueue(d *schema.ResourceData, meta interface{}) error {
 	return ReadQueue(d, meta)
 }
 
-func ReadQueue(d *schema.ResourceData, meta interface{}) error {
+func ReadQueue(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	name, vhost, err := parseResourceId(d)
@@ -130,7 +130,7 @@ func ReadQueue(d *schema.ResourceData, meta interface{}) error {
 	d.Set("name", queueSettings.Name)
 	d.Set("vhost", queueSettings.Vhost)
 
-	e := make(map[string]interface{})
+	e := make(map[string]any)
 	e["durable"] = queueSettings.Durable
 	e["auto_delete"] = queueSettings.AutoDelete
 
@@ -152,13 +152,13 @@ func ReadQueue(d *schema.ResourceData, meta interface{}) error {
 		e["arguments"] = queueSettings.Arguments
 	}
 
-	queue := make([]map[string]interface{}, 1)
+	queue := make([]map[string]any, 1)
 	queue[0] = e
 
 	return d.Set("settings", queue)
 }
 
-func DeleteQueue(d *schema.ResourceData, meta interface{}) error {
+func DeleteQueue(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	name, vhost, err := parseResourceId(d)
@@ -180,13 +180,13 @@ func DeleteQueue(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error deleting RabbitMQ queue: %s", resp.Status)
+		return fmt.Errorf("error deleting RabbitMQ queue: %s", resp.Status)
 	}
 
 	return nil
 }
 
-func declareQueue(rmqc *rabbithole.Client, vhost string, name string, settingsMap map[string]interface{}) error {
+func declareQueue(rmqc *rabbithole.Client, vhost string, name string, settingsMap map[string]any) error {
 	queueSettings := rabbithole.QueueSettings{}
 
 	if v, ok := settingsMap["durable"].(bool); ok {
@@ -197,7 +197,7 @@ func declareQueue(rmqc *rabbithole.Client, vhost string, name string, settingsMa
 		queueSettings.AutoDelete = v
 	}
 
-	if v, ok := settingsMap["arguments"].(map[string]interface{}); ok {
+	if v, ok := settingsMap["arguments"].(map[string]any); ok {
 		queueSettings.Arguments = v
 	}
 
@@ -210,13 +210,13 @@ func declareQueue(rmqc *rabbithole.Client, vhost string, name string, settingsMa
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error declaring RabbitMQ queue: %s", resp.Status)
+		return fmt.Errorf("error declaring RabbitMQ queue: %s", resp.Status)
 	}
 
 	return nil
 }
 
-func nonStringInArguments(args map[string]interface{}) bool {
+func nonStringInArguments(args map[string]any) bool {
 	for _, val := range args {
 		switch val.(type) {
 		case string:

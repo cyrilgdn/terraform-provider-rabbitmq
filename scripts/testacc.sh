@@ -6,7 +6,7 @@ SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
 source "$SCRIPT_DIR/test.env"
 
 setup() {
-    docker-compose -f "$SCRIPT_DIR/docker-compose.yml" up -d
+    docker compose -f "$SCRIPT_DIR/docker-compose.yml" up -d
     "$SCRIPT_DIR"/wait-rabbitmq-docker.sh
 }
 
@@ -18,7 +18,7 @@ run() {
 }
 
 cleanup() {
-    docker-compose -f "$SCRIPT_DIR/docker-compose.yml" down
+    docker compose -f "$SCRIPT_DIR/docker-compose.yml" down
 }
 
 testacc() {
