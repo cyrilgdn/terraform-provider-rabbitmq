@@ -1,5 +1,10 @@
-issues:
-  exclude-rules:
-    - linters:
-        - errcheck
-      text: "Error return value of `d.Set` is not checked"
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  settings:
+    errcheck:
+      exclude-functions:
+        - (*github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema.ResourceData).Set

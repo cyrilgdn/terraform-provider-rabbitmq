@@ -28,7 +28,7 @@ func resourceVhost() *schema.Resource {
 	}
 }
 
-func CreateVhost(d *schema.ResourceData, meta interface{}) error {
+func CreateVhost(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	vhost := d.Get("name").(string)
@@ -46,7 +46,7 @@ func CreateVhost(d *schema.ResourceData, meta interface{}) error {
 	return ReadVhost(d, meta)
 }
 
-func ReadVhost(d *schema.ResourceData, meta interface{}) error {
+func ReadVhost(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	vhost, err := rmqc.GetVhost(d.Id())
@@ -61,7 +61,7 @@ func ReadVhost(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func DeleteVhost(d *schema.ResourceData, meta interface{}) error {
+func DeleteVhost(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	log.Printf("[DEBUG] RabbitMQ: Attempting to delete vhost %s", d.Id())
@@ -78,7 +78,7 @@ func DeleteVhost(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error deleting RabbitMQ user: %s", resp.Status)
+		return fmt.Errorf("error deleting RabbitMQ user: %s", resp.Status)
 	}
 
 	return nil
