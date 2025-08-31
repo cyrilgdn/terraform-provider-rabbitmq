@@ -76,16 +76,16 @@ func resourceBinding() *schema.Resource {
 	}
 }
 
-func CreateBinding(d *schema.ResourceData, meta interface{}) error {
+func CreateBinding(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	vhost := d.Get("vhost").(string)
-	arguments := d.Get("arguments").(map[string]interface{})
+	arguments := d.Get("arguments").(map[string]any)
 
 	// If arguments_json is used, unmarshal it into a generic interface
 	// and use it as the "arguments" key for the binding.
 	if v, ok := d.Get("arguments_json").(string); ok && v != "" {
-		var arguments_json map[string]interface{}
+		var arguments_json map[string]any
 		err := json.Unmarshal([]byte(v), &arguments_json)
 		if err != nil {
 			return err
@@ -115,14 +115,14 @@ func CreateBinding(d *schema.ResourceData, meta interface{}) error {
 	return ReadBinding(d, meta)
 }
 
-func ReadBinding(d *schema.ResourceData, meta interface{}) error {
+func ReadBinding(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	log.Printf("[TRACE] RabbitMQ: read binding resource ID (pre-split): %s", d.Id())
 	bindingId := strings.Split(d.Id(), "/")
 	log.Printf("[DEBUG] RabbitMQ: binding ID: %#v", bindingId)
 	if len(bindingId) < 5 {
-		return fmt.Errorf("Unable to determine binding ID")
+		return fmt.Errorf("unable to determine binding ID")
 	}
 
 	vhost := percentDecodeSlashes(bindingId[0])
@@ -135,17 +135,18 @@ func ReadBinding(d *schema.ResourceData, meta interface{}) error {
 
 	var bindings []rabbithole.BindingInfo
 	var err error
-	if destinationType == "queue" {
+	switch destinationType {
+	case "queue":
 		bindings, err = rmqc.ListQueueBindingsBetween(vhost, source, destination)
 		if err != nil {
 			return err
 		}
-	} else if destinationType == "exchange" {
+	case "exchange":
 		bindings, err = rmqc.ListExchangeBindingsBetween(vhost, source, destination)
 		if err != nil {
 			return err
 		}
-	} else {
+	default:
 		bindings, err = rmqc.ListBindingsIn(vhost)
 		if err != nil {
 			return err
@@ -188,12 +189,12 @@ func ReadBinding(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func DeleteBinding(d *schema.ResourceData, meta interface{}) error {
+func DeleteBinding(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	bindingId := strings.Split(d.Id(), "/")
 	if len(bindingId) < 5 {
-		return fmt.Errorf("Unable to determine binding ID")
+		return fmt.Errorf("unable to determine binding ID")
 	}
 
 	vhost := percentDecodeSlashes(bindingId[0])
@@ -226,7 +227,7 @@ func DeleteBinding(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error deleting RabbitMQ binding: %s", resp.Status)
+		return fmt.Errorf("error deleting RabbitMQ binding: %s", resp.Status)
 	}
 
 	return nil
@@ -243,7 +244,7 @@ func declareBinding(rmqc *rabbithole.Client, vhost string, bindingInfo rabbithol
 	}
 
 	if resp.StatusCode >= 400 {
-		return "", fmt.Errorf("Error declaring RabbitMQ binding: %s", resp.Status)
+		return "", fmt.Errorf("error declaring RabbitMQ binding: %s", resp.Status)
 	}
 
 	location := strings.Split(resp.Header.Get("Location"), "/")

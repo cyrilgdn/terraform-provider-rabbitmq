@@ -50,7 +50,7 @@ func testAccPolicyCheck(rn string, policy *rabbithole.Policy) resource.TestCheck
 
 		policies, err := rmqc.ListPolicies()
 		if err != nil {
-			return fmt.Errorf("Error retrieving policies: %s", err)
+			return fmt.Errorf("error retrieving policies: %s", err)
 		}
 
 		for _, p := range policies {
@@ -60,7 +60,7 @@ func testAccPolicyCheck(rn string, policy *rabbithole.Policy) resource.TestCheck
 			}
 		}
 
-		return fmt.Errorf("Unable to find policy %s", rn)
+		return fmt.Errorf("unable to find policy %s", rn)
 	}
 }
 
@@ -70,7 +70,7 @@ func testAccPolicyCheckDestroy(policy *rabbithole.Policy) resource.TestCheckFunc
 
 		policies, err := rmqc.ListPolicies()
 		if err != nil {
-			return fmt.Errorf("Error retrieving policies: %s", err)
+			return fmt.Errorf("error retrieving policies: %s", err)
 		}
 
 		for _, p := range policies {

@@ -44,7 +44,7 @@ func testAccExchangeCheck(rn string, exchangeInfo *rabbithole.ExchangeInfo) reso
 
 		exchanges, err := rmqc.ListExchangesIn(exchParts[1])
 		if err != nil {
-			return fmt.Errorf("Error retrieving exchange: %s", err)
+			return fmt.Errorf("error retrieving exchange: %s", err)
 		}
 
 		for _, exchange := range exchanges {
@@ -54,7 +54,7 @@ func testAccExchangeCheck(rn string, exchangeInfo *rabbithole.ExchangeInfo) reso
 			}
 		}
 
-		return fmt.Errorf("Unable to find exchange %s", rn)
+		return fmt.Errorf("unable to find exchange %s", rn)
 	}
 }
 
@@ -64,7 +64,7 @@ func testAccExchangeCheckDestroy(exchangeInfo *rabbithole.ExchangeInfo) resource
 
 		exchanges, err := rmqc.ListExchangesIn(exchangeInfo.Vhost)
 		if err != nil {
-			return fmt.Errorf("Error retrieving exchange: %s", err)
+			return fmt.Errorf("error retrieving exchange: %s", err)
 		}
 
 		for _, exchange := range exchanges {

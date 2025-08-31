@@ -61,7 +61,7 @@ func resourceTopicPermissions() *schema.Resource {
 }
 
 // CreateTopicPermissions for given exchanges
-func CreateTopicPermissions(d *schema.ResourceData, meta interface{}) error {
+func CreateTopicPermissions(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	user := d.Get("user").(string)
@@ -70,9 +70,9 @@ func CreateTopicPermissions(d *schema.ResourceData, meta interface{}) error {
 
 	for _, exchange := range permsSet.List() {
 
-		permsMap, ok := exchange.(map[string]interface{})
+		permsMap, ok := exchange.(map[string]any)
 		if !ok {
-			return fmt.Errorf("Unable to parse permissions")
+			return fmt.Errorf("unable to parse permissions")
 		}
 
 		if err := setTopicPermissionsIn(rmqc, vhost, user, permsMap); err != nil {
@@ -87,7 +87,7 @@ func CreateTopicPermissions(d *schema.ResourceData, meta interface{}) error {
 }
 
 // ReadTopicPermissions for the given ID
-func ReadTopicPermissions(d *schema.ResourceData, meta interface{}) error {
+func ReadTopicPermissions(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	user, vhost, err := parseResourceId(d)
@@ -105,9 +105,9 @@ func ReadTopicPermissions(d *schema.ResourceData, meta interface{}) error {
 	d.Set("user", userPerms[0].User)
 	d.Set("vhost", userPerms[0].Vhost)
 
-	perms := make([]map[string]interface{}, len(userPerms))
+	perms := make([]map[string]any, len(userPerms))
 	for i, perm := range userPerms {
-		p := make(map[string]interface{})
+		p := make(map[string]any)
 		p["exchange"] = perm.Exchange
 		p["write"] = perm.Write
 		p["read"] = perm.Read
@@ -119,7 +119,7 @@ func ReadTopicPermissions(d *schema.ResourceData, meta interface{}) error {
 }
 
 // UpdateTopicPermissions for given ID
-func UpdateTopicPermissions(d *schema.ResourceData, meta interface{}) error {
+func UpdateTopicPermissions(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	user, vhost, err := parseResourceId(d)
@@ -135,9 +135,9 @@ func UpdateTopicPermissions(d *schema.ResourceData, meta interface{}) error {
 		_, newPerms := d.GetChange("permissions")
 		newPermsSet := newPerms.(*schema.Set)
 		for _, exchange := range newPermsSet.List() {
-			permsMap, ok := exchange.(map[string]interface{})
+			permsMap, ok := exchange.(map[string]any)
 			if !ok {
-				return fmt.Errorf("Unable to parse permissions")
+				return fmt.Errorf("unable to parse permissions")
 			}
 
 			if err := setTopicPermissionsIn(rmqc, vhost, user, permsMap); err != nil {
@@ -150,7 +150,7 @@ func UpdateTopicPermissions(d *schema.ResourceData, meta interface{}) error {
 }
 
 // DeleteTopicPermissions for given ID
-func DeleteTopicPermissions(d *schema.ResourceData, meta interface{}) error {
+func DeleteTopicPermissions(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	user, vhost, err := parseResourceId(d)
@@ -176,13 +176,13 @@ func DeleteTopicPermissions(d *schema.ResourceData, meta interface{}) error {
 		if verErr != nil {
 			return verErr
 		}
-		return fmt.Errorf("Error deleting RabbitMQ topic permission: %s", resp.Status)
+		return fmt.Errorf("error deleting RabbitMQ topic permission: %s", resp.Status)
 	}
 
 	return nil
 }
 
-func setTopicPermissionsIn(rmqc *rabbithole.Client, vhost string, user string, permsMap map[string]interface{}) error {
+func setTopicPermissionsIn(rmqc *rabbithole.Client, vhost string, user string, permsMap map[string]any) error {
 	perms := rabbithole.TopicPermissions{}
 
 	if v, ok := permsMap["exchange"].(string); ok {
@@ -210,7 +210,7 @@ func setTopicPermissionsIn(rmqc *rabbithole.Client, vhost string, user string, p
 		if verErr != nil {
 			return verErr
 		}
-		return fmt.Errorf("Error setting topic permissions: %s", resp.Status)
+		return fmt.Errorf("error setting topic permissions: %s", resp.Status)
 	}
 
 	return nil
@@ -220,7 +220,7 @@ func checkVersion(rmqc *rabbithole.Client) error {
 	overview, _ := rmqc.Overview()
 	ver, _ := strconv.ParseFloat(overview.RabbitMQVersion, 32)
 	if ver < 3.7 {
-		return fmt.Errorf("Topic permissions were adding in RabbitMQ 3.7, connected to %s", overview.RabbitMQVersion)
+		return fmt.Errorf("topic permissions were adding in RabbitMQ 3.7, connected to %s", overview.RabbitMQVersion)
 	}
 	return nil
 }

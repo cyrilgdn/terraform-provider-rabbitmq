@@ -106,7 +106,7 @@ func testAccBindingCheck(rn string, bindingInfo *rabbithole.BindingInfo) resourc
 
 		bindings, err := rmqc.ListBindingsIn(percentDecodeSlashes(bindingParts[0]))
 		if err != nil {
-			return fmt.Errorf("Error retrieving exchange: %s", err)
+			return fmt.Errorf("error retrieving exchange: %s", err)
 		}
 
 		for _, binding := range bindings {
@@ -116,13 +116,13 @@ func testAccBindingCheck(rn string, bindingInfo *rabbithole.BindingInfo) resourc
 			}
 		}
 
-		return fmt.Errorf("Unable to find binding %s", rn)
+		return fmt.Errorf("unable to find binding %s", rn)
 	}
 }
 
 func testAccBindingCheckJsonArguments(rn string, bindingInfo *rabbithole.BindingInfo, js string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		var configMap map[string]interface{}
+		var configMap map[string]any
 		if err := json.Unmarshal([]byte(js), &configMap); err != nil {
 			return err
 		}
@@ -134,7 +134,7 @@ func testAccBindingCheckJsonArguments(rn string, bindingInfo *rabbithole.Binding
 		if !ok {
 			return fmt.Errorf("resource not found: %s", rn)
 		}
-		var configMap2 map[string]interface{}
+		var configMap2 map[string]any
 		if err := json.Unmarshal([]byte(rs.Primary.Attributes["arguments_json"]), &configMap2); err != nil {
 			return err
 		}
@@ -152,7 +152,7 @@ func testAccBindingCheckDestroy(bindingInfo rabbithole.BindingInfo) resource.Tes
 
 		bindings, err := rmqc.ListBindingsIn(bindingInfo.Vhost)
 		if err != nil {
-			return fmt.Errorf("Error retrieving exchange: %s", err)
+			return fmt.Errorf("error retrieving exchange: %s", err)
 		}
 
 		for _, binding := range bindings {
