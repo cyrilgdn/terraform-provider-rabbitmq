@@ -50,7 +50,7 @@ func testAccShovelCheck(rn string, shovelInfo *rabbithole.ShovelInfo) resource.T
 
 		shovelInfos, err := rmqc.ListShovels()
 		if err != nil {
-			return fmt.Errorf("Error retrieving shovels: %s", err)
+			return fmt.Errorf("error retrieving shovels: %s", err)
 		}
 
 		for _, info := range shovelInfos {
@@ -80,7 +80,7 @@ func testAccShovelCheck(rn string, shovelInfo *rabbithole.ShovelInfo) resource.T
 			}
 		}
 
-		return fmt.Errorf("Unable to find shovel %s", rn)
+		return fmt.Errorf("unable to find shovel %s", rn)
 	}
 }
 
@@ -90,7 +90,7 @@ func testAccShovelCheckDestroy(shovelInfo *rabbithole.ShovelInfo) resource.TestC
 
 		shovelInfos, err := rmqc.ListShovels()
 		if err != nil {
-			return fmt.Errorf("Error retrieving shovels: %s", err)
+			return fmt.Errorf("error retrieving shovels: %s", err)
 		}
 
 		for _, info := range shovelInfos {
@@ -146,6 +146,13 @@ resource "rabbitmq_shovel" "shovelTest" {
 		source_exchange_key = "test"
 		destination_uri = "amqp:///test"
 		destination_queue = "${rabbitmq_queue.test.name}"
+		destination_publish_properties = {
+			reply_to = "test2.local"
+			correlation_id = "gfdgdfgdfg"
+		}
+		destination_queue_arguments = {
+			x-queue-type = "classic"
+		}
 	}
 }`
 

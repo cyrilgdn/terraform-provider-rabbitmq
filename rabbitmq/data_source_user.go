@@ -31,7 +31,7 @@ func dataSourcesUser() *schema.Resource {
 	}
 }
 
-func dataSourcesReadUser(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourcesReadUser(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	rmqc := meta.(*rabbithole.Client)
