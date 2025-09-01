@@ -42,23 +42,27 @@ func resourceExchange() *schema.Resource {
 						"type": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 						},
 
 						"durable": {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Default:  false,
+							ForceNew: true,
 						},
 
 						"auto_delete": {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Default:  false,
+							ForceNew: true,
 						},
 
 						"arguments": {
 							Type:     schema.TypeMap,
 							Optional: true,
+							ForceNew: true,
 						},
 					},
 				},
