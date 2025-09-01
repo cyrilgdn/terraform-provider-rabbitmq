@@ -82,7 +82,8 @@ func CreateOperatorPolicy(d *schema.ResourceData, meta any) error {
 		return err
 	}
 
-	d.SetId(fmt.Sprintf("%s@%s", name, vhost))
+	id := buildVHostResourceId(name, vhost)
+	d.SetId(id)
 
 	return ReadOperatorPolicy(d, meta)
 }
@@ -90,7 +91,7 @@ func CreateOperatorPolicy(d *schema.ResourceData, meta any) error {
 func ReadOperatorPolicy(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	name, vhost, err := parseResourceId(d)
+	name, vhost, err := parseVHostResourceId(d)
 	if err != nil {
 		return err
 	}
@@ -138,7 +139,7 @@ func ReadOperatorPolicy(d *schema.ResourceData, meta any) error {
 func UpdateOperatorPolicy(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	name, vhost, err := parseResourceId(d)
+	name, vhost, err := parseVHostResourceId(d)
 	if err != nil {
 		return err
 	}
@@ -163,7 +164,7 @@ func UpdateOperatorPolicy(d *schema.ResourceData, meta any) error {
 func DeleteOperatorPolicy(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	name, vhost, err := parseResourceId(d)
+	name, vhost, err := parseVHostResourceId(d)
 	if err != nil {
 		return err
 	}

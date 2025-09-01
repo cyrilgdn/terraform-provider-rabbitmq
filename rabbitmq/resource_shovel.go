@@ -209,8 +209,9 @@ func resourceShovel() *schema.Resource {
 func CreateShovel(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
+	name := d.Get("name").(string)
 	vhost := d.Get("vhost").(string)
-	shovelName := d.Get("name").(string)
+
 	shovelInfo := d.Get("info").([]any)
 
 	shovelMap, ok := shovelInfo[0].(map[string]any)
@@ -220,16 +221,15 @@ func CreateShovel(d *schema.ResourceData, meta any) error {
 
 	shovelDefinition := setShovelDefinition(shovelMap).(rabbithole.ShovelDefinition)
 
-	log.Printf("[DEBUG] RabbitMQ: Attempting to declare shovel %s in vhost %s", shovelName, vhost)
-	resp, err := rmqc.DeclareShovel(vhost, shovelName, shovelDefinition)
+	log.Printf("[DEBUG] RabbitMQ: Attempting to declare shovel %s in vhost %s", name, vhost)
+	resp, err := rmqc.DeclareShovel(vhost, name, shovelDefinition)
 	log.Printf("[DEBUG] RabbitMQ: shovel declartion response: %#v", resp)
 	if err != nil {
 		return err
 	}
 
-	shovelId := fmt.Sprintf("%s@%s", shovelName, vhost)
-
-	d.SetId(shovelId)
+	id := buildVHostResourceId(name, vhost)
+	d.SetId(id)
 
 	return ReadShovel(d, meta)
 }
@@ -237,7 +237,7 @@ func CreateShovel(d *schema.ResourceData, meta any) error {
 func ReadShovel(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	name, vhost, err := parseResourceId(d)
+	name, vhost, err := parseVHostResourceId(d)
 	if err != nil {
 		return err
 	}
@@ -290,7 +290,7 @@ func ReadShovel(d *schema.ResourceData, meta any) error {
 func UpdateShovel(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	name, vhost, err := parseResourceId(d)
+	name, vhost, err := parseVHostResourceId(d)
 	if err != nil {
 		return err
 	}
@@ -319,7 +319,7 @@ func UpdateShovel(d *schema.ResourceData, meta any) error {
 func DeleteShovel(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	name, vhost, err := parseResourceId(d)
+	name, vhost, err := parseVHostResourceId(d)
 	if err != nil {
 		return err
 	}

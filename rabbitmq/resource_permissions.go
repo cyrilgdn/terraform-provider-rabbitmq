@@ -76,7 +76,7 @@ func CreatePermissions(d *schema.ResourceData, meta any) error {
 		return err
 	}
 
-	id := fmt.Sprintf("%s@%s", user, vhost)
+	id := buildVHostResourceId(user, vhost)
 	d.SetId(id)
 
 	return ReadPermissions(d, meta)
@@ -85,7 +85,7 @@ func CreatePermissions(d *schema.ResourceData, meta any) error {
 func ReadPermissions(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	user, vhost, err := parseResourceId(d)
+	user, vhost, err := parseVHostResourceId(d)
 	if err != nil {
 		return err
 	}
@@ -114,7 +114,7 @@ func ReadPermissions(d *schema.ResourceData, meta any) error {
 func UpdatePermissions(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	user, vhost, err := parseResourceId(d)
+	user, vhost, err := parseVHostResourceId(d)
 	if err != nil {
 		return err
 	}
@@ -139,7 +139,7 @@ func UpdatePermissions(d *schema.ResourceData, meta any) error {
 func DeletePermissions(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	user, vhost, err := parseResourceId(d)
+	user, vhost, err := parseVHostResourceId(d)
 	if err != nil {
 		return err
 	}

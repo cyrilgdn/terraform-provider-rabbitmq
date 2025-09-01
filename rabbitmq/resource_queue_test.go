@@ -54,6 +54,23 @@ func TestAccQueue_jsonArguments(t *testing.T) {
 	})
 }
 
+func TestAccQueue_atSymbolEscaping(t *testing.T) {
+	var queueInfo rabbithole.QueueInfo
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccQueueCheckDestroy(&queueInfo),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccQueueConfig_atSymbolsAreOk,
+				Check: testAccQueueCheck(
+					"rabbitmq_queue.test", &queueInfo,
+				),
+			},
+		},
+	})
+}
+
 func testAccQueueCheck(rn string, queueInfo *rabbithole.QueueInfo) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[rn]
@@ -66,15 +83,15 @@ func testAccQueueCheck(rn string, queueInfo *rabbithole.QueueInfo) resource.Test
 		}
 
 		rmqc := testAccProvider.Meta().(*rabbithole.Client)
-		queueParts := strings.Split(rs.Primary.ID, "@")
+		name, vhost, err := parseVHostResourceIdString(rs.Primary.ID)
 
-		queues, err := rmqc.ListQueuesIn(queueParts[1])
+		queues, err := rmqc.ListQueuesIn(vhost)
 		if err != nil {
 			return fmt.Errorf("error retrieving queue: %s", err)
 		}
 
 		for _, queue := range queues {
-			if queue.Name == queueParts[0] && queue.Vhost == queueParts[1] {
+			if queue.Name == name && queue.Vhost == vhost {
 				*queueInfo = queue
 				return nil
 			}
@@ -209,3 +226,27 @@ resource "rabbitmq_queue" "test" {
 	}
 }`, j)
 }
+
+const testAccQueueConfig_atSymbolsAreOk = `
+resource "rabbitmq_vhost" "test" {
+    name = "test"
+}
+
+resource "rabbitmq_permissions" "guest" {
+    user = "guest"
+    vhost = "${rabbitmq_vhost.test.name}"
+    permissions {
+        configure = ".*"
+        write = ".*"
+        read = ".*"
+    }
+}
+
+resource "rabbitmq_queue" "test" {
+    name = "queue@test"
+    vhost = "${rabbitmq_permissions.guest.vhost}"
+    settings {
+        durable = false
+        auto_delete = true
+    }
+}`

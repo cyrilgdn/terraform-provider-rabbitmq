@@ -2,7 +2,6 @@ package rabbitmq
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -57,7 +56,7 @@ func testAccOperatorPolicyCheck(rn string, operatorPolicy *rabbithole.OperatorPo
 		}
 
 		rmqc := testAccProvider.Meta().(*rabbithole.Client)
-		operatorPolicyParts := strings.Split(rs.Primary.ID, "@")
+		name, vhost, err := parseVHostResourceIdString(rs.Primary.ID)
 
 		operatorPolicies, err := rmqc.ListOperatorPolicies()
 		if err != nil {
@@ -65,7 +64,7 @@ func testAccOperatorPolicyCheck(rn string, operatorPolicy *rabbithole.OperatorPo
 		}
 
 		for _, p := range operatorPolicies {
-			if p.Name == operatorPolicyParts[0] && p.Vhost == operatorPolicyParts[1] {
+			if p.Name == name && p.Vhost == vhost {
 				operatorPolicy = &p
 				return nil
 			}

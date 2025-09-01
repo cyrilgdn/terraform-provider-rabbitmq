@@ -3,7 +3,6 @@ package rabbitmq
 import (
 	"fmt"
 	"regexp"
-	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -123,9 +122,7 @@ func testAccFederationUpstreamCheck(rn string, upstream *rabbithole.FederationUp
 			return fmt.Errorf("federation upstream id not set")
 		}
 
-		id := strings.Split(rs.Primary.ID, "@")
-		name := id[0]
-		vhost := id[1]
+		name, vhost, err := parseVHostResourceIdString(rs.Primary.ID)
 
 		rmqc := testAccProvider.Meta().(*rabbithole.Client)
 		upstreams, err := rmqc.ListFederationUpstreamsIn(vhost)

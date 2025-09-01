@@ -83,7 +83,7 @@ func CreateExchange(d *schema.ResourceData, meta any) error {
 		return err
 	}
 
-	id := fmt.Sprintf("%s@%s", name, vhost)
+	id := buildVHostResourceId(name, vhost)
 	d.SetId(id)
 
 	return ReadExchange(d, meta)
@@ -92,7 +92,7 @@ func CreateExchange(d *schema.ResourceData, meta any) error {
 func ReadExchange(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	name, vhost, err := parseResourceId(d)
+	name, vhost, err := parseVHostResourceId(d)
 	if err != nil {
 		return err
 	}
@@ -122,7 +122,7 @@ func ReadExchange(d *schema.ResourceData, meta any) error {
 func DeleteExchange(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
-	name, vhost, err := parseResourceId(d)
+	name, vhost, err := parseVHostResourceId(d)
 	if err != nil {
 		return err
 	}

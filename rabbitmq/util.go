@@ -35,19 +35,40 @@ func percentDecodeSlashes(s string) string {
 	return strings.ReplaceAll(strings.ReplaceAll(s, "%2F", "/"), "%25", "%")
 }
 
-// get the id of the resource from the ResourceData
-func parseResourceId(d *schema.ResourceData) (name, vhost string, err error) {
-	return parseId(d.Id())
+// Builds a combined resource id using a percent encoded name and vhost.
+func buildVHostResourceId(name, vhost string) string {
+	id := fmt.Sprintf("%s@%s", percentEncodeAtSymbols(name), percentEncodeAtSymbols(vhost))
+	return id
 }
 
-// get the resource name and rabbitmq vhost from the resource id
-func parseId(resourceId string) (name, vhost string, err error) {
+// Get the resource name and rabbitmq vhost from the ResourceData.
+func parseVHostResourceId(d *schema.ResourceData) (name, vhost string, err error) {
+	return parseVHostResourceIdString(d.Id())
+}
+
+// Get the resource name and rabbitmq vhost from the resource id.
+func parseVHostResourceIdString(resourceId string) (name, vhost string, err error) {
 	parts := strings.Split(resourceId, "@")
 	if len(parts) != 2 {
 		err = fmt.Errorf("unable to parse resource id: %s", resourceId)
 		return
 	}
-	name = parts[0]
-	vhost = parts[1]
+	name = percentDecodeAtSymbols(parts[0])
+	vhost = percentDecodeAtSymbols(parts[1])
 	return
+}
+
+// Because the @ symbol is used to separate the name & vhost components when building a "vhost resource id",
+// we need a way to ensure that any @ symbol within the components can survive the round trip.
+// Percent-encoding is a straightforward way of doing so.
+// (reference: https://developer.mozilla.org/en-US/docs/Glossary/percent-encoding)
+
+func percentEncodeAtSymbols(s string) string {
+	// Encode any percent signs, then encode any @ symbols.
+	return strings.Replace(strings.Replace(s, "%", "%25", -1), "@", "%40", -1)
+}
+
+func percentDecodeAtSymbols(s string) string {
+	// Decode any @ symbols, then decode any percent signs.
+	return strings.Replace(strings.Replace(s, "%40", "@", -1), "%25", "%", -1)
 }
