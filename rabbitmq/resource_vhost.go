@@ -3,6 +3,7 @@ package rabbitmq
 import (
 	"fmt"
 	"log"
+	"strconv"
 
 	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
 
@@ -14,6 +15,7 @@ func resourceVhost() *schema.Resource {
 		Create: CreateVhost,
 		Read:   ReadVhost,
 		Delete: DeleteVhost,
+		Update: UpdateVhost,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -23,6 +25,37 @@ func resourceVhost() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+			},
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: false,
+			},
+			// "tags": {
+			// 	Type:     schema.TypeList,
+			// 	Elem:     &schema.Schema{Type: schema.TypeString},
+			// 	Optional: true,
+			// 	ForceNew: true,
+			// },
+			"default_queue_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: false,
+			},
+			"tracing": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: false,
+			},
+			"max_connections": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: false,
+			},
+			"max_queues": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: false,
 			},
 		},
 	}
@@ -35,13 +68,149 @@ func CreateVhost(d *schema.ResourceData, meta any) error {
 
 	log.Printf("[DEBUG] RabbitMQ: Attempting to create vhost %s", vhost)
 
-	resp, err := rmqc.PutVhost(vhost, rabbithole.VhostSettings{})
+	var settings rabbithole.VhostSettings
+
+	if v, ok := d.Get("default_queue_type").(string); ok && v != "" {
+		settings.DefaultQueueType = v
+	}
+
+	if v, ok := d.Get("description").(string); ok && v != "" {
+		settings.Description = v
+	}
+
+	if v, ok := d.Get("tracing").(bool); ok {
+		settings.Tracing = v
+	}
+
+	limits := make(rabbithole.VhostLimitsValues)
+
+	if v, ok := d.GetOk("max_connections"); ok {
+		v_int, err := strconv.Atoi(v.(string))
+		if err != nil {
+			log.Printf("[ERROR] RabbitMQ: Error converting max_connections to int: %#v", err)
+		}
+		limits["max-connections"] = v_int
+	}
+
+	if v, ok := d.GetOk("max_queues"); ok {
+		v_int, err := strconv.Atoi(v.(string))
+		if err != nil {
+			log.Printf("[ERROR] RabbitMQ: Error converting max_queues to int: %#v", err)
+		}
+		limits["max-queues"] = v_int
+	}
+
+	resp, err := rmqc.PutVhost(vhost, settings)
+	log.Printf("[DEBUG] RabbitMQ: vhost creation response: %#v", resp)
+	if err != nil {
+		return err
+	}
+
+	resp, err = rmqc.PutVhostLimits(vhost, limits)
 	log.Printf("[DEBUG] RabbitMQ: vhost creation response: %#v", resp)
 	if err != nil {
 		return err
 	}
 
 	d.SetId(vhost)
+
+	return ReadVhost(d, meta)
+}
+
+func UpdateVhost(d *schema.ResourceData, meta any) error {
+	rmqc := meta.(*rabbithole.Client)
+
+	vhost, err := rmqc.GetVhost(d.Id())
+	if err != nil {
+		return checkDeleted(d, err)
+	}
+
+	vhost_limits_info, err := rmqc.GetVhostLimits(d.Id())
+	if err != nil {
+		return checkDeleted(d, err)
+	}
+
+	var settings rabbithole.VhostSettings
+	limits := make(rabbithole.VhostLimitsValues)
+
+	if d.HasChange("description") {
+		_, newDescription := d.GetChange("description")
+
+		if v, ok := newDescription.(string); ok && v != "" {
+			settings.Description = v
+		}
+	} else {
+		settings.Description = vhost.Description
+	}
+
+	if d.HasChange("default_queue_type") {
+		_, newDefaultQueueType := d.GetChange("default_queue_type")
+
+		if v, ok := newDefaultQueueType.(string); ok && v != "" {
+			settings.DefaultQueueType = v
+		}
+	} else {
+		settings.DefaultQueueType = vhost.DefaultQueueType
+	}
+
+	if d.HasChange("tracing") {
+		_, newTracing := d.GetChange("tracing")
+
+		if v, ok := newTracing.(bool); ok {
+			settings.Tracing = v
+		}
+	} else {
+		settings.Tracing = vhost.Tracing
+	}
+
+	if _, ok := d.GetOk("max_connections"); ok {
+		if d.HasChange("max_connections") {
+
+			_, newMaxConnections := d.GetChange("max_connections")
+
+			if v, ok := newMaxConnections.(string); ok {
+				limits["max-connections"], err = strconv.Atoi(v)
+				if err != nil {
+					log.Printf("[ERROR] RabbitMQ: Error converting max_connections to int: %#v", err)
+				}
+			}
+		} else {
+			limits["max-connections"] = vhost_limits_info[0].Value["max-connections"]
+		}
+	}
+
+	if _, ok := d.GetOk("max_queues"); ok {
+		if d.HasChange("max_queues") {
+			_, newMaxQueues := d.GetChange("max_queues")
+
+			if v, ok := newMaxQueues.(string); ok {
+				limits["max-queues"], err = strconv.Atoi(v)
+				if err != nil {
+					log.Printf("[ERROR] RabbitMQ: Error converting max_queues to int: %#v", err)
+				}
+			}
+		} else {
+			limits["max-queues"] = vhost_limits_info[0].Value["max-queues"]
+		}
+	}
+
+	resp, err := rmqc.PutVhost(vhost.Name, settings)
+	log.Printf("[DEBUG] RabbitMQ: vhost creation response: %#v", resp)
+	if err != nil {
+		return err
+	}
+
+	resp, err = rmqc.DeleteVhostLimits(vhost.Name, rabbithole.VhostLimits{"max-connections", "max-queues"})
+	log.Printf("[DEBUG] RabbitMQ: vhost limits deletion response: %#v", resp)
+	if err != nil {
+		return err
+	}
+
+	resp, err = rmqc.PutVhostLimits(vhost.Name, limits)
+	log.Printf("[DEBUG] RabbitMQ: vhost limits creation response: %#v", resp)
+	if err != nil {
+		return err
+	}
 
 	return ReadVhost(d, meta)
 }
@@ -56,7 +225,32 @@ func ReadVhost(d *schema.ResourceData, meta any) error {
 
 	log.Printf("[DEBUG] RabbitMQ: Vhost retrieved: %#v", vhost)
 
+	vhost_limits_info, err := rmqc.GetVhostLimits(d.Id())
+	if err != nil {
+		return checkDeleted(d, err)
+	}
+
+	log.Printf("[DEBUG] RabbitMQ: Vhost retrieved: %#v", vhost)
+
 	d.Set("name", vhost.Name)
+	d.Set("description", vhost.Description)
+	// d.Set("tags", vhost.Tags)
+	d.Set("tracing", vhost.Tracing)
+
+	if len(vhost_limits_info) > 0 {
+
+		if val, ok := vhost_limits_info[0].Value["max-connections"]; ok {
+			d.Set("max_connections", strconv.Itoa(val))
+		} else {
+			d.Set("max_connections", "") // set as unlimited
+		}
+
+		if val, ok := vhost_limits_info[0].Value["max-queues"]; ok {
+			d.Set("max_queues", strconv.Itoa(val))
+		} else {
+			d.Set("max_queues", "") // set as unlimited
+		}
+	}
 
 	return nil
 }
