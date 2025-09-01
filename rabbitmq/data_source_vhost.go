@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
+	rabbithole "github.com/michaelklishin/rabbit-hole/v3"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -26,7 +26,7 @@ func dataSourcesVhost() *schema.Resource {
 	}
 }
 
-func dataSourcesReadVhost(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourcesReadVhost(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	rmqc := meta.(*rabbithole.Client)

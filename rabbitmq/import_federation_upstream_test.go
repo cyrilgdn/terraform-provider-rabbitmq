@@ -3,7 +3,7 @@ package rabbitmq
 import (
 	"testing"
 
-	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
+	rabbithole "github.com/michaelklishin/rabbit-hole/v3"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )

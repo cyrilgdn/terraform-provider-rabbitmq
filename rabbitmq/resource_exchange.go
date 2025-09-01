@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
+	rabbithole "github.com/michaelklishin/rabbit-hole/v3"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -42,23 +42,27 @@ func resourceExchange() *schema.Resource {
 						"type": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 						},
 
 						"durable": {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Default:  false,
+							ForceNew: true,
 						},
 
 						"auto_delete": {
 							Type:     schema.TypeBool,
 							Optional: true,
 							Default:  false,
+							ForceNew: true,
 						},
 
 						"arguments": {
 							Type:     schema.TypeMap,
 							Optional: true,
+							ForceNew: true,
 						},
 					},
 				},
@@ -67,16 +71,16 @@ func resourceExchange() *schema.Resource {
 	}
 }
 
-func CreateExchange(d *schema.ResourceData, meta interface{}) error {
+func CreateExchange(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	name := d.Get("name").(string)
 	vhost := d.Get("vhost").(string)
-	settingsList := d.Get("settings").([]interface{})
+	settingsList := d.Get("settings").([]any)
 
-	settingsMap, ok := settingsList[0].(map[string]interface{})
+	settingsMap, ok := settingsList[0].(map[string]any)
 	if !ok {
-		return fmt.Errorf("Unable to parse settings")
+		return fmt.Errorf("unable to parse settings")
 	}
 
 	if err := declareExchange(rmqc, vhost, name, settingsMap); err != nil {
@@ -89,7 +93,7 @@ func CreateExchange(d *schema.ResourceData, meta interface{}) error {
 	return ReadExchange(d, meta)
 }
 
-func ReadExchange(d *schema.ResourceData, meta interface{}) error {
+func ReadExchange(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	name, vhost, err := parseResourceId(d)
@@ -107,8 +111,8 @@ func ReadExchange(d *schema.ResourceData, meta interface{}) error {
 	d.Set("name", exchangeSettings.Name)
 	d.Set("vhost", exchangeSettings.Vhost)
 
-	exchange := make([]map[string]interface{}, 1)
-	e := make(map[string]interface{})
+	exchange := make([]map[string]any, 1)
+	e := make(map[string]any)
 	e["type"] = exchangeSettings.Type
 	e["durable"] = exchangeSettings.Durable
 	e["auto_delete"] = exchangeSettings.AutoDelete
@@ -119,7 +123,7 @@ func ReadExchange(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func DeleteExchange(d *schema.ResourceData, meta interface{}) error {
+func DeleteExchange(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	name, vhost, err := parseResourceId(d)
@@ -141,13 +145,13 @@ func DeleteExchange(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error deleting RabbitMQ exchange: %s", resp.Status)
+		return fmt.Errorf("error deleting RabbitMQ exchange: %s", resp.Status)
 	}
 
 	return nil
 }
 
-func declareExchange(rmqc *rabbithole.Client, vhost string, name string, settingsMap map[string]interface{}) error {
+func declareExchange(rmqc *rabbithole.Client, vhost string, name string, settingsMap map[string]any) error {
 	exchangeSettings := rabbithole.ExchangeSettings{}
 
 	if v, ok := settingsMap["type"].(string); ok {
@@ -162,7 +166,7 @@ func declareExchange(rmqc *rabbithole.Client, vhost string, name string, setting
 		exchangeSettings.AutoDelete = v
 	}
 
-	if v, ok := settingsMap["arguments"].(map[string]interface{}); ok {
+	if v, ok := settingsMap["arguments"].(map[string]any); ok {
 		exchangeSettings.Arguments = v
 	}
 
@@ -175,7 +179,7 @@ func declareExchange(rmqc *rabbithole.Client, vhost string, name string, setting
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error declaring RabbitMQ exchange: %s", resp.Status)
+		return fmt.Errorf("error declaring RabbitMQ exchange: %s", resp.Status)
 	}
 
 	return nil

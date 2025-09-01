@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
+	rabbithole "github.com/michaelklishin/rabbit-hole/v3"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -20,6 +20,12 @@ func TestAccExchange(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccExchangeConfig_basic,
+				Check: testAccExchangeCheck(
+					"rabbitmq_exchange.test", &exchangeInfo,
+				),
+			},
+			{
+				Config: testAccExchangeConfig_update,
 				Check: testAccExchangeCheck(
 					"rabbitmq_exchange.test", &exchangeInfo,
 				),
@@ -44,7 +50,7 @@ func testAccExchangeCheck(rn string, exchangeInfo *rabbithole.ExchangeInfo) reso
 
 		exchanges, err := rmqc.ListExchangesIn(exchParts[1])
 		if err != nil {
-			return fmt.Errorf("Error retrieving exchange: %s", err)
+			return fmt.Errorf("error retrieving exchange: %s", err)
 		}
 
 		for _, exchange := range exchanges {
@@ -54,7 +60,7 @@ func testAccExchangeCheck(rn string, exchangeInfo *rabbithole.ExchangeInfo) reso
 			}
 		}
 
-		return fmt.Errorf("Unable to find exchange %s", rn)
+		return fmt.Errorf("unable to find exchange %s", rn)
 	}
 }
 
@@ -64,7 +70,7 @@ func testAccExchangeCheckDestroy(exchangeInfo *rabbithole.ExchangeInfo) resource
 
 		exchanges, err := rmqc.ListExchangesIn(exchangeInfo.Vhost)
 		if err != nil {
-			return fmt.Errorf("Error retrieving exchange: %s", err)
+			return fmt.Errorf("error retrieving exchange: %s", err)
 		}
 
 		for _, exchange := range exchanges {
@@ -99,5 +105,30 @@ resource "rabbitmq_exchange" "test" {
         type = "fanout"
         durable = false
         auto_delete = true
+    }
+}`
+
+const testAccExchangeConfig_update = `
+resource "rabbitmq_vhost" "test" {
+    name = "test"
+}
+
+resource "rabbitmq_permissions" "guest" {
+    user = "guest"
+    vhost = "${rabbitmq_vhost.test.name}"
+    permissions {
+        configure = ".*"
+        write = ".*"
+        read = ".*"
+    }
+}
+
+resource "rabbitmq_exchange" "test" {
+    name = "test"
+    vhost = "${rabbitmq_permissions.guest.vhost}"
+    settings {
+        type = "direct"
+        durable = true
+        auto_delete = false
     }
 }`

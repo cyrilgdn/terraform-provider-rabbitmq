@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
+	rabbithole "github.com/michaelklishin/rabbit-hole/v3"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -67,7 +67,7 @@ func testAccVhostCheck(rn string, name *string) resource.TestCheckFunc {
 		rmqc := testAccProvider.Meta().(*rabbithole.Client)
 		vhosts, err := rmqc.ListVhosts()
 		if err != nil {
-			return fmt.Errorf("Error retrieving vhosts: %s", err)
+			return fmt.Errorf("error retrieving vhosts: %s", err)
 		}
 
 		for _, vhost := range vhosts {
@@ -77,7 +77,7 @@ func testAccVhostCheck(rn string, name *string) resource.TestCheckFunc {
 			}
 		}
 
-		return fmt.Errorf("Unable to find vhost %s", rn)
+		return fmt.Errorf("unable to find vhost %s", rn)
 	}
 }
 
@@ -86,7 +86,7 @@ func testAccVhostCheckDestroy(name string) resource.TestCheckFunc {
 		rmqc := testAccProvider.Meta().(*rabbithole.Client)
 		vhosts, err := rmqc.ListVhosts()
 		if err != nil {
-			return fmt.Errorf("Error retrieving vhosts: %s", err)
+			return fmt.Errorf("error retrieving vhosts: %s", err)
 		}
 
 		for _, vhost := range vhosts {
@@ -102,4 +102,8 @@ func testAccVhostCheckDestroy(name string) resource.TestCheckFunc {
 const testAccVhostConfig_basic = `
 resource "rabbitmq_vhost" "test" {
     name = "test"
+	description = "test description"
+	tracing = true
+	max_connections = 100
+	max_queues = 200
 }`

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
+	rabbithole "github.com/michaelklishin/rabbit-hole/v3"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -158,7 +158,7 @@ func testAccUserCheck(rn string, name *string) resource.TestCheckFunc {
 		rmqc := testAccProvider.Meta().(*rabbithole.Client)
 		users, err := rmqc.ListUsers()
 		if err != nil {
-			return fmt.Errorf("Error retrieving users: %s", err)
+			return fmt.Errorf("error retrieving users: %s", err)
 		}
 
 		for _, user := range users {
@@ -168,7 +168,7 @@ func testAccUserCheck(rn string, name *string) resource.TestCheckFunc {
 			}
 		}
 
-		return fmt.Errorf("Unable to find user %s", rn)
+		return fmt.Errorf("unable to find user %s", rn)
 	}
 }
 
@@ -192,7 +192,7 @@ func testAccUserCheckTagCount(name *string, tagCount int) resource.TestCheckFunc
 		rmqc := testAccProvider.Meta().(*rabbithole.Client)
 		user, err := rmqc.GetUser(*name)
 		if err != nil {
-			return fmt.Errorf("Error retrieving user: %s", err)
+			return fmt.Errorf("error retrieving user: %s", err)
 		}
 
 		var tagList []string
@@ -215,7 +215,7 @@ func testAccUserCheckDestroy(name string) resource.TestCheckFunc {
 		rmqc := testAccProvider.Meta().(*rabbithole.Client)
 		users, err := rmqc.ListUsers()
 		if err != nil {
-			return fmt.Errorf("Error retrieving users: %s", err)
+			return fmt.Errorf("error retrieving users: %s", err)
 		}
 
 		for _, user := range users {

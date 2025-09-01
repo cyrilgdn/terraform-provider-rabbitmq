@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
+	rabbithole "github.com/michaelklishin/rabbit-hole/v3"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -58,7 +58,7 @@ func testAccTopicPermissionsCheck(rn string, topicPermissionInfo *rabbithole.Top
 		rmqc := testAccProvider.Meta().(*rabbithole.Client)
 		perms, err := rmqc.ListTopicPermissions()
 		if err != nil {
-			return fmt.Errorf("Error retrieving topic permissions: %s", err)
+			return fmt.Errorf("error retrieving topic permissions: %s", err)
 		}
 
 		userParts := strings.Split(rs.Primary.ID, "@")
@@ -69,7 +69,7 @@ func testAccTopicPermissionsCheck(rn string, topicPermissionInfo *rabbithole.Top
 			}
 		}
 
-		return fmt.Errorf("Unable to find topic permissions for user %s", rn)
+		return fmt.Errorf("unable to find topic permissions for user %s", rn)
 	}
 }
 
@@ -78,12 +78,12 @@ func testAccTopicPermissionsCheckDestroy(topicPermissionInfo *rabbithole.TopicPe
 		rmqc := testAccProvider.Meta().(*rabbithole.Client)
 		perms, err := rmqc.ListTopicPermissions()
 		if err != nil {
-			return fmt.Errorf("Error retrieving topic permissions: %s", err)
+			return fmt.Errorf("error retrieving topic permissions: %s", err)
 		}
 
 		for _, perm := range perms {
 			if perm.User == topicPermissionInfo.User && perm.Vhost == topicPermissionInfo.Vhost {
-				return fmt.Errorf("Topic permissions still exist for user %s@%s", topicPermissionInfo.User, topicPermissionInfo.Vhost)
+				return fmt.Errorf("topic permissions still exist for user %s@%s", topicPermissionInfo.User, topicPermissionInfo.Vhost)
 			}
 		}
 

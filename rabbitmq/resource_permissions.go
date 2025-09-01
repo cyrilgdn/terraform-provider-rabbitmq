@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
+	rabbithole "github.com/michaelklishin/rabbit-hole/v3"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -60,16 +60,16 @@ func resourcePermissions() *schema.Resource {
 	}
 }
 
-func CreatePermissions(d *schema.ResourceData, meta interface{}) error {
+func CreatePermissions(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	user := d.Get("user").(string)
 	vhost := d.Get("vhost").(string)
-	permsList := d.Get("permissions").([]interface{})
+	permsList := d.Get("permissions").([]any)
 
-	permsMap := map[string]interface{}{}
+	permsMap := map[string]any{}
 	if permsList[0] != nil {
-		permsMap = permsList[0].(map[string]interface{})
+		permsMap = permsList[0].(map[string]any)
 	}
 
 	if err := setPermissionsIn(rmqc, vhost, user, permsMap); err != nil {
@@ -82,7 +82,7 @@ func CreatePermissions(d *schema.ResourceData, meta interface{}) error {
 	return ReadPermissions(d, meta)
 }
 
-func ReadPermissions(d *schema.ResourceData, meta interface{}) error {
+func ReadPermissions(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	user, vhost, err := parseResourceId(d)
@@ -100,8 +100,8 @@ func ReadPermissions(d *schema.ResourceData, meta interface{}) error {
 	d.Set("user", userPerms.User)
 	d.Set("vhost", userPerms.Vhost)
 
-	perms := make([]map[string]interface{}, 1)
-	p := make(map[string]interface{})
+	perms := make([]map[string]any, 1)
+	p := make(map[string]any)
 	p["configure"] = userPerms.Configure
 	p["write"] = userPerms.Write
 	p["read"] = userPerms.Read
@@ -111,7 +111,7 @@ func ReadPermissions(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func UpdatePermissions(d *schema.ResourceData, meta interface{}) error {
+func UpdatePermissions(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	user, vhost, err := parseResourceId(d)
@@ -122,10 +122,10 @@ func UpdatePermissions(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("permissions") {
 		_, newPerms := d.GetChange("permissions")
 
-		newPermsList := newPerms.([]interface{})
-		permsMap, ok := newPermsList[0].(map[string]interface{})
+		newPermsList := newPerms.([]any)
+		permsMap, ok := newPermsList[0].(map[string]any)
 		if !ok {
-			return fmt.Errorf("Unable to parse permissions")
+			return fmt.Errorf("unable to parse permissions")
 		}
 
 		if err := setPermissionsIn(rmqc, vhost, user, permsMap); err != nil {
@@ -136,7 +136,7 @@ func UpdatePermissions(d *schema.ResourceData, meta interface{}) error {
 	return ReadPermissions(d, meta)
 }
 
-func DeletePermissions(d *schema.ResourceData, meta interface{}) error {
+func DeletePermissions(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	user, vhost, err := parseResourceId(d)
@@ -158,13 +158,13 @@ func DeletePermissions(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error deleting RabbitMQ permission: %s", resp.Status)
+		return fmt.Errorf("error deleting RabbitMQ permission: %s", resp.Status)
 	}
 
 	return nil
 }
 
-func setPermissionsIn(rmqc *rabbithole.Client, vhost string, user string, permsMap map[string]interface{}) error {
+func setPermissionsIn(rmqc *rabbithole.Client, vhost string, user string, permsMap map[string]any) error {
 	perms := rabbithole.Permissions{}
 
 	if v, ok := permsMap["configure"].(string); ok {
@@ -188,7 +188,7 @@ func setPermissionsIn(rmqc *rabbithole.Client, vhost string, user string, permsM
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error setting permissions: %s", resp.Status)
+		return fmt.Errorf("error setting permissions: %s", resp.Status)
 	}
 
 	return nil

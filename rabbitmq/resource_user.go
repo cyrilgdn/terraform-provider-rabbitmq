@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 
-	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
+	rabbithole "github.com/michaelklishin/rabbit-hole/v3"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -41,7 +41,7 @@ func resourceUser() *schema.Resource {
 	}
 }
 
-func CreateUser(d *schema.ResourceData, meta interface{}) error {
+func CreateUser(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	name := d.Get("name").(string)
@@ -60,7 +60,7 @@ func CreateUser(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error creating RabbitMQ user: %s", resp.Status)
+		return fmt.Errorf("error creating RabbitMQ user: %s", resp.Status)
 	}
 
 	d.SetId(name)
@@ -68,7 +68,7 @@ func CreateUser(d *schema.ResourceData, meta interface{}) error {
 	return ReadUser(d, meta)
 }
 
-func ReadUser(d *schema.ResourceData, meta interface{}) error {
+func ReadUser(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	user, err := rmqc.GetUser(d.Id())
@@ -95,7 +95,7 @@ func ReadUser(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func UpdateUser(d *schema.ResourceData, meta interface{}) error {
+func UpdateUser(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	name := d.Id()
@@ -116,13 +116,13 @@ func UpdateUser(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error updating RabbitMQ user: %s", resp.Status)
+		return fmt.Errorf("error updating RabbitMQ user: %s", resp.Status)
 	}
 
 	return ReadUser(d, meta)
 }
 
-func DeleteUser(d *schema.ResourceData, meta interface{}) error {
+func DeleteUser(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	name := d.Id()
@@ -140,7 +140,7 @@ func DeleteUser(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error deleting RabbitMQ user: %s", resp.Status)
+		return fmt.Errorf("error deleting RabbitMQ user: %s", resp.Status)
 	}
 
 	return nil
@@ -148,7 +148,7 @@ func DeleteUser(d *schema.ResourceData, meta interface{}) error {
 
 func userTagsToString(d *schema.ResourceData) rabbithole.UserTags {
 	tagList := rabbithole.UserTags{}
-	for _, v := range d.Get("tags").([]interface{}) {
+	for _, v := range d.Get("tags").([]any) {
 		if tag, ok := v.(string); ok {
 			tagList = append(tagList, tag)
 		}

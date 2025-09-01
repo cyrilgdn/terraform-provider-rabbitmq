@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
+	rabbithole "github.com/michaelklishin/rabbit-hole/v3"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -85,7 +85,7 @@ func testAccPermissionsCheck(rn string, permissionInfo *rabbithole.PermissionInf
 		rmqc := testAccProvider.Meta().(*rabbithole.Client)
 		perms, err := rmqc.ListPermissions()
 		if err != nil {
-			return fmt.Errorf("Error retrieving permissions: %s", err)
+			return fmt.Errorf("error retrieving permissions: %s", err)
 		}
 
 		userParts := strings.Split(rs.Primary.ID, "@")
@@ -96,7 +96,7 @@ func testAccPermissionsCheck(rn string, permissionInfo *rabbithole.PermissionInf
 			}
 		}
 
-		return fmt.Errorf("Unable to find permissions for user %s", rn)
+		return fmt.Errorf("unable to find permissions for user %s", rn)
 	}
 }
 
@@ -105,7 +105,7 @@ func testAccPermissionsCheckDestroy(permissionInfo *rabbithole.PermissionInfo) r
 		rmqc := testAccProvider.Meta().(*rabbithole.Client)
 		perms, err := rmqc.ListPermissions()
 		if err != nil {
-			return fmt.Errorf("Error retrieving permissions: %s", err)
+			return fmt.Errorf("error retrieving permissions: %s", err)
 		}
 
 		for _, perm := range perms {

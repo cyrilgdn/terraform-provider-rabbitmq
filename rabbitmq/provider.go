@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"os"
 
-	rabbithole "github.com/michaelklishin/rabbit-hole/v2"
+	rabbithole "github.com/michaelklishin/rabbit-hole/v3"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -20,10 +20,10 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("RABBITMQ_ENDPOINT", nil),
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+				ValidateFunc: func(v any, k string) (ws []string, errors []error) {
 					value := v.(string)
 					if value == "" {
-						errors = append(errors, fmt.Errorf("Endpoint must not be an empty string"))
+						errors = append(errors, fmt.Errorf("endpoint must not be an empty string"))
 					}
 
 					return
@@ -34,10 +34,10 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("RABBITMQ_USERNAME", nil),
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+				ValidateFunc: func(v any, k string) (ws []string, errors []error) {
 					value := v.(string)
 					if value == "" {
-						errors = append(errors, fmt.Errorf("Username must not be an empty string"))
+						errors = append(errors, fmt.Errorf("username must not be an empty string"))
 					}
 
 					return
@@ -48,10 +48,10 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("RABBITMQ_PASSWORD", nil),
-				ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+				ValidateFunc: func(v any, k string) (ws []string, errors []error) {
 					value := v.(string)
 					if value == "" {
-						errors = append(errors, fmt.Errorf("Password must not be an empty string"))
+						errors = append(errors, fmt.Errorf("password must not be an empty string"))
 					}
 
 					return
@@ -112,7 +112,7 @@ func Provider() *schema.Provider {
 	}
 }
 
-func providerConfigure(d *schema.ResourceData) (interface{}, error) {
+func providerConfigure(d *schema.ResourceData) (any, error) {
 
 	var username = d.Get("username").(string)
 	var password = d.Get("password").(string)
