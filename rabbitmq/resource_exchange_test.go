@@ -24,6 +24,12 @@ func TestAccExchange(t *testing.T) {
 					"rabbitmq_exchange.test", &exchangeInfo,
 				),
 			},
+			{
+				Config: testAccExchangeConfig_update,
+				Check: testAccExchangeCheck(
+					"rabbitmq_exchange.test", &exchangeInfo,
+				),
+			},
 		},
 	})
 }
@@ -99,5 +105,30 @@ resource "rabbitmq_exchange" "test" {
         type = "fanout"
         durable = false
         auto_delete = true
+    }
+}`
+
+const testAccExchangeConfig_update = `
+resource "rabbitmq_vhost" "test" {
+    name = "test"
+}
+
+resource "rabbitmq_permissions" "guest" {
+    user = "guest"
+    vhost = "${rabbitmq_vhost.test.name}"
+    permissions {
+        configure = ".*"
+        write = ".*"
+        read = ".*"
+    }
+}
+
+resource "rabbitmq_exchange" "test" {
+    name = "test"
+    vhost = "${rabbitmq_permissions.guest.vhost}"
+    settings {
+        type = "direct"
+        durable = true
+        auto_delete = false
     }
 }`
