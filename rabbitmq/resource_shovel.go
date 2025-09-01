@@ -78,7 +78,7 @@ func resourceShovel() *schema.Resource {
 							Default:  nil,
 						},
 						"destination_application_properties": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeMap,
 							Optional: true,
 							ForceNew: true,
 							Default:  nil,
@@ -97,7 +97,7 @@ func resourceShovel() *schema.Resource {
 							Default:  nil,
 						},
 						"destination_properties": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeMap,
 							Optional: true,
 							ForceNew: true,
 							Default:  nil,
@@ -109,7 +109,7 @@ func resourceShovel() *schema.Resource {
 							Default:  "amqp091",
 						},
 						"destination_publish_properties": {
-							Type:     schema.TypeString,
+							Type:     schema.TypeMap,
 							Optional: true,
 							ForceNew: true,
 							Default:  nil,
@@ -120,6 +120,12 @@ func resourceShovel() *schema.Resource {
 							Default:       nil,
 							Optional:      true,
 							ForceNew:      true,
+						},
+						"destination_queue_arguments": {
+							Type:     schema.TypeMap,
+							Optional: true,
+							ForceNew: true,
+							Default:  nil,
 						},
 						"destination_uri": {
 							Type:      schema.TypeString,
@@ -200,16 +206,17 @@ func resourceShovel() *schema.Resource {
 	}
 }
 
-func CreateShovel(d *schema.ResourceData, meta interface{}) error {
+func CreateShovel(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	name := d.Get("name").(string)
 	vhost := d.Get("vhost").(string)
-	shovelInfo := d.Get("info").([]interface{})
 
-	shovelMap, ok := shovelInfo[0].(map[string]interface{})
+	shovelInfo := d.Get("info").([]any)
+
+	shovelMap, ok := shovelInfo[0].(map[string]any)
 	if !ok {
-		return fmt.Errorf("Unable to parse shovel info")
+		return fmt.Errorf("unable to parse shovel info")
 	}
 
 	shovelDefinition := setShovelDefinition(shovelMap).(rabbithole.ShovelDefinition)
@@ -227,7 +234,7 @@ func CreateShovel(d *schema.ResourceData, meta interface{}) error {
 	return ReadShovel(d, meta)
 }
 
-func ReadShovel(d *schema.ResourceData, meta interface{}) error {
+func ReadShovel(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	name, vhost, err := parseVHostResourceId(d)
@@ -242,7 +249,7 @@ func ReadShovel(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[DEBUG] RabbitMQ: Shovel retrieved: Vhost: %#v, Name: %#v", vhost, name)
 
-	info := make(map[string]interface{})
+	info := make(map[string]any)
 	info["ack_mode"] = shovelInfo.Definition.AckMode
 	info["add_forward_headers"] = shovelInfo.Definition.AddForwardHeaders
 	info["delete_after"] = shovelInfo.Definition.DeleteAfter
@@ -255,6 +262,7 @@ func ReadShovel(d *schema.ResourceData, meta interface{}) error {
 	info["destination_properties"] = shovelInfo.Definition.DestinationProperties
 	info["destination_protocol"] = shovelInfo.Definition.DestinationProtocol
 	info["destination_publish_properties"] = shovelInfo.Definition.DestinationPublishProperties
+	info["destination_queue_arguments"] = shovelInfo.Definition.DestinationQueueArgs
 	info["destination_queue"] = shovelInfo.Definition.DestinationQueue
 	if len(shovelInfo.Definition.DestinationURI) > 0 {
 		info["destination_uri"] = shovelInfo.Definition.DestinationURI[0]
@@ -274,12 +282,12 @@ func ReadShovel(d *schema.ResourceData, meta interface{}) error {
 
 	d.Set("name", shovelInfo.Name)
 	d.Set("vhost", shovelInfo.Vhost)
-	d.Set("info", []map[string]interface{}{info})
+	d.Set("info", []map[string]any{info})
 
 	return nil
 }
 
-func UpdateShovel(d *schema.ResourceData, meta interface{}) error {
+func UpdateShovel(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	name, vhost, err := parseVHostResourceId(d)
@@ -290,10 +298,10 @@ func UpdateShovel(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("info") {
 		_, newShovel := d.GetChange("info")
 
-		newShovelList := newShovel.([]interface{})
-		infoMap, ok := newShovelList[0].(map[string]interface{})
+		newShovelList := newShovel.([]any)
+		infoMap, ok := newShovelList[0].(map[string]any)
 		if !ok {
-			return fmt.Errorf("Unable to parse shovel info")
+			return fmt.Errorf("unable to parse shovel info")
 		}
 
 		shovelDefinition := setShovelDefinition(infoMap).(rabbithole.ShovelDefinition)
@@ -308,7 +316,7 @@ func UpdateShovel(d *schema.ResourceData, meta interface{}) error {
 	return ReadShovel(d, meta)
 }
 
-func DeleteShovel(d *schema.ResourceData, meta interface{}) error {
+func DeleteShovel(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	name, vhost, err := parseVHostResourceId(d)
@@ -325,13 +333,13 @@ func DeleteShovel(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error deleting RabbitMQ shovel: %s", resp.Status)
+		return fmt.Errorf("error deleting RabbitMQ shovel: %s", resp.Status)
 	}
 
 	return nil
 }
 
-func setShovelDefinition(shovelMap map[string]interface{}) interface{} {
+func setShovelDefinition(shovelMap map[string]any) interface{} {
 	shovelDefinition := &rabbithole.ShovelDefinition{}
 
 	if v, ok := shovelMap["ack_mode"].(string); ok {
@@ -358,7 +366,7 @@ func setShovelDefinition(shovelMap map[string]interface{}) interface{} {
 		shovelDefinition.DestinationAddress = v
 	}
 
-	if v, ok := shovelMap["destination_application_properties"].(string); ok {
+	if v, ok := shovelMap["destination_application_properties"].(map[string]interface{}); ok {
 		shovelDefinition.DestinationApplicationProperties = v
 	}
 
@@ -370,7 +378,7 @@ func setShovelDefinition(shovelMap map[string]interface{}) interface{} {
 		shovelDefinition.DestinationExchangeKey = v
 	}
 
-	if v, ok := shovelMap["destination_properties"].(string); ok {
+	if v, ok := shovelMap["destination_properties"].(map[string]interface{}); ok {
 		shovelDefinition.DestinationProperties = v
 	}
 
@@ -378,12 +386,16 @@ func setShovelDefinition(shovelMap map[string]interface{}) interface{} {
 		shovelDefinition.DestinationProtocol = v
 	}
 
-	if v, ok := shovelMap["destination_publish_properties"].(string); ok {
+	if v, ok := shovelMap["destination_publish_properties"].(map[string]interface{}); ok {
 		shovelDefinition.DestinationPublishProperties = v
 	}
 
 	if v, ok := shovelMap["destination_queue"].(string); ok {
 		shovelDefinition.DestinationQueue = v
+	}
+
+	if v, ok := shovelMap["destination_queue_arguments"].(map[string]interface{}); ok {
+		shovelDefinition.DestinationQueueArgs = v
 	}
 
 	if v, ok := shovelMap["destination_uri"].(string); ok {

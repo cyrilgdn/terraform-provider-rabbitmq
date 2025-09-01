@@ -87,7 +87,7 @@ func testAccQueueCheck(rn string, queueInfo *rabbithole.QueueInfo) resource.Test
 
 		queues, err := rmqc.ListQueuesIn(vhost)
 		if err != nil {
-			return fmt.Errorf("Error retrieving queue: %s", err)
+			return fmt.Errorf("error retrieving queue: %s", err)
 		}
 
 		for _, queue := range queues {
@@ -97,13 +97,13 @@ func testAccQueueCheck(rn string, queueInfo *rabbithole.QueueInfo) resource.Test
 			}
 		}
 
-		return fmt.Errorf("Unable to find queue %s", rn)
+		return fmt.Errorf("unable to find queue %s", rn)
 	}
 }
 
 func testAccQueueCheckJsonArguments(rn string, queueInfo *rabbithole.QueueInfo, js string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		var configMap map[string]interface{}
+		var configMap map[string]any
 		if err := json.Unmarshal([]byte(js), &configMap); err != nil {
 			return err
 		}
@@ -115,7 +115,7 @@ func testAccQueueCheckJsonArguments(rn string, queueInfo *rabbithole.QueueInfo, 
 		if !ok {
 			return fmt.Errorf("resource not found: %s", rn)
 		}
-		var configMap2 map[string]interface{}
+		var configMap2 map[string]any
 		if err := json.Unmarshal([]byte(rs.Primary.Attributes["settings.0.arguments_json"]), &configMap2); err != nil {
 			return err
 		}
@@ -133,7 +133,7 @@ func testAccQueueCheckDestroy(queueInfo *rabbithole.QueueInfo) resource.TestChec
 
 		queues, err := rmqc.ListQueuesIn(queueInfo.Vhost)
 		if err != nil && !strings.Contains(strings.ToLower(err.Error()), "not found") {
-			return fmt.Errorf("Error retrieving queues: %s", err)
+			return fmt.Errorf("error retrieving queues: %s", err)
 		}
 
 		for _, queue := range queues {

@@ -127,7 +127,7 @@ func testAccFederationUpstreamCheck(rn string, upstream *rabbithole.FederationUp
 		rmqc := testAccProvider.Meta().(*rabbithole.Client)
 		upstreams, err := rmqc.ListFederationUpstreamsIn(vhost)
 		if err != nil {
-			return fmt.Errorf("Error retrieving federation upstreams: %s", err)
+			return fmt.Errorf("error retrieving federation upstreams: %s", err)
 		}
 
 		for _, up := range upstreams {
@@ -137,7 +137,7 @@ func testAccFederationUpstreamCheck(rn string, upstream *rabbithole.FederationUp
 			}
 		}
 
-		return fmt.Errorf("Unable to find federation upstream %s", rn)
+		return fmt.Errorf("unable to find federation upstream %s", rn)
 	}
 }
 
@@ -147,7 +147,7 @@ func testAccFederationUpstreamCheckDestroy(upstream *rabbithole.FederationUpstre
 
 		upstreams, err := rmqc.ListFederationUpstreamsIn(upstream.Vhost)
 		if err != nil {
-			return fmt.Errorf("Error retrieving federation upstreams: %s", err)
+			return fmt.Errorf("error retrieving federation upstreams: %s", err)
 		}
 
 		for _, up := range upstreams {

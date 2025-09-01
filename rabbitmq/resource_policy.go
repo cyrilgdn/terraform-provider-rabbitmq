@@ -66,16 +66,16 @@ func resourcePolicy() *schema.Resource {
 	}
 }
 
-func CreatePolicy(d *schema.ResourceData, meta interface{}) error {
+func CreatePolicy(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	name := d.Get("name").(string)
 	vhost := d.Get("vhost").(string)
-	policyList := d.Get("policy").([]interface{})
+	policyList := d.Get("policy").([]any)
 
-	policyMap, ok := policyList[0].(map[string]interface{})
+	policyMap, ok := policyList[0].(map[string]any)
 	if !ok {
-		return fmt.Errorf("Unable to parse policy")
+		return fmt.Errorf("unable to parse policy")
 	}
 
 	if err := putPolicy(rmqc, vhost, name, policyMap); err != nil {
@@ -88,7 +88,7 @@ func CreatePolicy(d *schema.ResourceData, meta interface{}) error {
 	return ReadPolicy(d, meta)
 }
 
-func ReadPolicy(d *schema.ResourceData, meta interface{}) error {
+func ReadPolicy(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	name, vhost, err := parseVHostResourceId(d)
@@ -106,18 +106,18 @@ func ReadPolicy(d *schema.ResourceData, meta interface{}) error {
 	d.Set("name", policy.Name)
 	d.Set("vhost", policy.Vhost)
 
-	setPolicy := make([]map[string]interface{}, 1)
-	p := make(map[string]interface{})
+	setPolicy := make([]map[string]any, 1)
+	p := make(map[string]any)
 	p["pattern"] = policy.Pattern
 	p["priority"] = policy.Priority
 	p["apply_to"] = policy.ApplyTo
 
-	policyDefinition := make(map[string]interface{})
+	policyDefinition := make(map[string]any)
 	for key, value := range policy.Definition {
 		switch v := value.(type) {
 		case float64:
 			value = strconv.FormatFloat(v, 'f', -1, 64)
-		case []interface{}:
+		case []any:
 			var nodes []string
 			for _, node := range v {
 				if n, ok := node.(string); ok {
@@ -136,7 +136,7 @@ func ReadPolicy(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func UpdatePolicy(d *schema.ResourceData, meta interface{}) error {
+func UpdatePolicy(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	name, vhost, err := parseVHostResourceId(d)
@@ -147,10 +147,10 @@ func UpdatePolicy(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("policy") {
 		_, newPolicy := d.GetChange("policy")
 
-		policyList := newPolicy.([]interface{})
-		policyMap, ok := policyList[0].(map[string]interface{})
+		policyList := newPolicy.([]any)
+		policyMap, ok := policyList[0].(map[string]any)
 		if !ok {
-			return fmt.Errorf("Unable to parse policy")
+			return fmt.Errorf("unable to parse policy")
 		}
 
 		if err := putPolicy(rmqc, vhost, name, policyMap); err != nil {
@@ -161,7 +161,7 @@ func UpdatePolicy(d *schema.ResourceData, meta interface{}) error {
 	return ReadPolicy(d, meta)
 }
 
-func DeletePolicy(d *schema.ResourceData, meta interface{}) error {
+func DeletePolicy(d *schema.ResourceData, meta any) error {
 	rmqc := meta.(*rabbithole.Client)
 
 	name, vhost, err := parseVHostResourceId(d)
@@ -183,13 +183,13 @@ func DeletePolicy(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error deleting RabbitMQ policy: %s", resp.Status)
+		return fmt.Errorf("error deleting RabbitMQ policy: %s", resp.Status)
 	}
 
 	return nil
 }
 
-func putPolicy(rmqc *rabbithole.Client, vhost string, name string, policyMap map[string]interface{}) error {
+func putPolicy(rmqc *rabbithole.Client, vhost string, name string, policyMap map[string]any) error {
 	policy := rabbithole.Policy{}
 	policy.Vhost = vhost
 	policy.Name = name
@@ -206,7 +206,7 @@ func putPolicy(rmqc *rabbithole.Client, vhost string, name string, policyMap map
 		policy.ApplyTo = v
 	}
 
-	if v, ok := policyMap["definition"].(map[string]interface{}); ok {
+	if v, ok := policyMap["definition"].(map[string]any); ok {
 		// special case for ha-mode = nodes
 		if x, ok := v["ha-mode"]; ok && x == "nodes" {
 			var nodes rabbithole.NodeNames
@@ -237,7 +237,7 @@ func putPolicy(rmqc *rabbithole.Client, vhost string, name string, policyMap map
 	}
 
 	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error declaring RabbitMQ policy: %s", resp.Status)
+		return fmt.Errorf("error declaring RabbitMQ policy: %s", resp.Status)
 	}
 
 	return nil

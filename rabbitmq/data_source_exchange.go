@@ -60,7 +60,7 @@ func dataSourcesExchange() *schema.Resource {
 	}
 }
 
-func dataSourcesReadExchange(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourcesReadExchange(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	rmqc := meta.(*rabbithole.Client)
@@ -79,8 +79,8 @@ func dataSourcesReadExchange(ctx context.Context, d *schema.ResourceData, meta i
 	d.Set("name", exchangeSettings.Name)
 	d.Set("vhost", exchangeSettings.Vhost)
 
-	exchange := make([]map[string]interface{}, 1)
-	e := make(map[string]interface{})
+	exchange := make([]map[string]any, 1)
+	e := make(map[string]any)
 	e["type"] = exchangeSettings.Type
 	e["durable"] = exchangeSettings.Durable
 	e["auto_delete"] = exchangeSettings.AutoDelete

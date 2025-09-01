@@ -27,12 +27,12 @@ func checkDeleted(d *schema.ResourceData, err error) error {
 
 func percentEncodeSlashes(s string) string {
 	// Encode any percent signs, then encode any forward slashes.
-	return strings.Replace(strings.Replace(s, "%", "%25", -1), "/", "%2F", -1)
+	return strings.ReplaceAll(strings.ReplaceAll(s, "%", "%25"), "/", "%2F")
 }
 
 func percentDecodeSlashes(s string) string {
 	// Decode any forward slashes, then decode any percent signs.
-	return strings.Replace(strings.Replace(s, "%2F", "/", -1), "%25", "%", -1)
+	return strings.ReplaceAll(strings.ReplaceAll(s, "%2F", "/"), "%25", "%")
 }
 
 // Builds a combined resource id using a percent encoded name and vhost.
@@ -50,7 +50,7 @@ func parseVHostResourceId(d *schema.ResourceData) (name, vhost string, err error
 func parseVHostResourceIdString(resourceId string) (name, vhost string, err error) {
 	parts := strings.Split(resourceId, "@")
 	if len(parts) != 2 {
-		err = fmt.Errorf("Unable to parse resource id: %s", resourceId)
+		err = fmt.Errorf("unable to parse resource id: %s", resourceId)
 		return
 	}
 	name = percentDecodeAtSymbols(parts[0])
