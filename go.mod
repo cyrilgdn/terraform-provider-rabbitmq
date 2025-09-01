@@ -2,7 +2,7 @@ module github.com/terraform-providers/terraform-provider-rabbitmq
 
 require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.37.0
-	github.com/michaelklishin/rabbit-hole/v2 v2.16.0
+	github.com/michaelklishin/rabbit-hole/v3 v3.2.0
 )
 
 require (
@@ -41,9 +41,6 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/oklog/run v1.1.0 // indirect
-	github.com/onsi/ginkgo/v2 v2.23.3 // indirect
-	github.com/onsi/gomega v1.37.0 // indirect
-	github.com/rabbitmq/amqp091-go v1.10.0 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
