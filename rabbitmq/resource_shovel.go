@@ -19,6 +19,15 @@ func resourceShovel() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 
+		SchemaVersion: 1,
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Type:    resourceShovelV0().CoreConfigSchema().ImpliedType(),
+				Upgrade: upgradeShovelV0toV1,
+				Version: 0,
+			},
+		},
+
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
