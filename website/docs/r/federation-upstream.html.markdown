@@ -102,6 +102,7 @@ Applicable to Federated Exchanges Only
 Applicable to Federated Queues Only
 
 * `queue` - (Optional) The name of the upstream queue.
+* `queue_type` - (Optional) The type of the federated queue. Valid values are `classic`, `quorum`, and `stream`.
 
 Consult the RabbitMQ [Federation Reference](https://www.rabbitmq.com/federation-reference.html) documentation for detailed information and guidance on setting these values.
 
