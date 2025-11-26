@@ -105,6 +105,16 @@ func resourceFederationUpstream() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
+
+						"queue_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"classic",
+								"quorum",
+								"stream",
+							}, false),
+						},
 					},
 				},
 			},
@@ -168,6 +178,7 @@ func ReadFederationUpstream(d *schema.ResourceData, meta any) error {
 		"expires":         upstream.Definition.Expires,
 		"message_ttl":     upstream.Definition.MessageTTL,
 		"queue":           upstream.Definition.Queue,
+		"queue_type":      upstream.Definition.QueueType,
 	}
 
 	defList := [1]map[string]any{defMap}
@@ -272,6 +283,10 @@ func putFederationUpstream(rmqc *rabbithole.Client, vhost string, name string, d
 
 	if v, ok := defMap["queue"].(string); ok {
 		definition.Queue = v
+	}
+
+	if v, ok := defMap["queue_type"].(string); ok {
+		definition.QueueType = v
 	}
 
 	log.Printf("[DEBUG] RabbitMQ: Attempting to declare federation upstream for %s@%s: %#v", name, vhost, definition)
