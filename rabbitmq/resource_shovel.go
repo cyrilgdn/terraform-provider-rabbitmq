@@ -3,6 +3,7 @@ package rabbitmq
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	rabbithole "github.com/michaelklishin/rabbit-hole/v3"
 
@@ -273,9 +274,7 @@ func ReadShovel(d *schema.ResourceData, meta any) error {
 	info["destination_publish_properties"] = shovelInfo.Definition.DestinationPublishProperties
 	info["destination_queue_arguments"] = shovelInfo.Definition.DestinationQueueArgs
 	info["destination_queue"] = shovelInfo.Definition.DestinationQueue
-	if len(shovelInfo.Definition.DestinationURI) > 0 {
-		info["destination_uri"] = shovelInfo.Definition.DestinationURI[0]
-	}
+	info["destination_uri"] = strings.Join(shovelInfo.Definition.DestinationURI, " ")
 	info["prefetch_count"] = shovelInfo.Definition.PrefetchCount
 	info["reconnect_delay"] = shovelInfo.Definition.ReconnectDelay
 	info["source_address"] = shovelInfo.Definition.SourceAddress
@@ -285,9 +284,7 @@ func ReadShovel(d *schema.ResourceData, meta any) error {
 	info["source_prefetch_count"] = shovelInfo.Definition.SourcePrefetchCount
 	info["source_protocol"] = shovelInfo.Definition.SourceProtocol
 	info["source_queue"] = shovelInfo.Definition.SourceQueue
-	if len(shovelInfo.Definition.SourceURI) > 0 {
-		info["source_uri"] = shovelInfo.Definition.SourceURI[0]
-	}
+	info["source_uri"] = strings.Join(shovelInfo.Definition.SourceURI, " ")
 
 	d.Set("name", shovelInfo.Name)
 	d.Set("vhost", shovelInfo.Vhost)
@@ -408,7 +405,7 @@ func setShovelDefinition(shovelMap map[string]any) interface{} {
 	}
 
 	if v, ok := shovelMap["destination_uri"].(string); ok {
-		shovelDefinition.DestinationURI = []string{v}
+		shovelDefinition.DestinationURI = strings.Fields(v)
 	}
 
 	if v, ok := shovelMap["prefetch_count"].(int); ok {
@@ -446,7 +443,7 @@ func setShovelDefinition(shovelMap map[string]any) interface{} {
 	}
 
 	if v, ok := shovelMap["source_uri"].(string); ok {
-		shovelDefinition.SourceURI = []string{v}
+		shovelDefinition.SourceURI = strings.Fields(v)
 	}
 
 	return *shovelDefinition

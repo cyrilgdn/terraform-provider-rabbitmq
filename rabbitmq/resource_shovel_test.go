@@ -34,6 +34,24 @@ func TestAccShovel(t *testing.T) {
 	})
 }
 
+func TestAccShovelCluster(t *testing.T) {
+	var shovelInfo rabbithole.ShovelInfo
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccShovelCheckDestroy(&shovelInfo),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccShovelConfig_cluster,
+				Check: testAccShovelCheck(
+					"rabbitmq_shovel.shovelCluster", &shovelInfo,
+				),
+			},
+		},
+	})
+}
+
 func testAccShovelCheck(rn string, shovelInfo *rabbithole.ShovelInfo) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[rn]
@@ -62,8 +80,8 @@ func testAccShovelCheck(rn string, shovelInfo *rabbithole.ShovelInfo) resource.T
 				shovelInfo = &info
 				actualSourceExchange := shovelInfo.Definition.SourceExchange
 				actualSourceExchangeKey := shovelInfo.Definition.SourceExchangeKey
-				actualSourceUri := shovelInfo.Definition.SourceURI[0]
-				actualDestinationUri := shovelInfo.Definition.DestinationURI[0]
+				actualSourceUri := strings.Join(shovelInfo.Definition.SourceURI, " ")
+				actualDestinationUri := strings.Join(shovelInfo.Definition.DestinationURI, " ")
 				if actualSourceExchange != expectedSourceExchange {
 					return fmt.Errorf("SourceExchange was not set to [%s], was [%s]", expectedSourceExchange, actualSourceExchange)
 				}
@@ -153,6 +171,51 @@ resource "rabbitmq_shovel" "shovelTest" {
 		destination_queue_arguments = {
 			x-queue-type = "classic"
 		}
+	}
+}`
+
+const testAccShovelConfig_cluster = `
+resource "rabbitmq_vhost" "test" {
+    name = "test"
+}
+
+resource "rabbitmq_permissions" "guest" {
+    user = "guest"
+    vhost = "${rabbitmq_vhost.test.name}"
+    permissions {
+        configure = ".*"
+        write = ".*"
+        read = ".*"
+    }
+}
+
+resource "rabbitmq_exchange" "test" {
+    name = "test_exchange"
+    vhost = "${rabbitmq_permissions.guest.vhost}"
+    settings {
+        type = "fanout"
+        durable = false
+        auto_delete = true
+    }
+}
+
+resource "rabbitmq_queue" "test" {
+	name = "test_queue"
+	vhost = "${rabbitmq_exchange.test.vhost}"
+	settings {
+		durable = false
+		auto_delete = true
+	}
+}
+
+resource "rabbitmq_shovel" "shovelCluster" {
+	name = "shovelCluster"
+	vhost = "${rabbitmq_queue.test.vhost}"
+	info {
+		source_uri      = "amqp:///test"
+		source_exchange = "${rabbitmq_exchange.test.name}"
+		destination_uri = "amqp:///test amqp:///test"
+		destination_queue = "${rabbitmq_queue.test.name}"
 	}
 }`
 
