@@ -6,6 +6,7 @@ import (
 
 	rabbithole "github.com/michaelklishin/rabbit-hole/v3"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -27,9 +28,28 @@ func resourceUser() *schema.Resource {
 			},
 
 			"password": {
-				Type:      schema.TypeString,
-				Required:  true,
-				Sensitive: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Sensitive:    true,
+				ExactlyOneOf: []string{"password", "password_wo"},
+			},
+
+			"password_wo": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Sensitive:    true,
+				WriteOnly:    true,
+				ExactlyOneOf: []string{"password", "password_wo"},
+				RequiredWith: []string{"password_wo_version"},
+			},
+
+			// password_wo is never stored in state, so Terraform can never detect a
+			// change to it. Changing password_wo_version is what produces a diff and
+			// therefore what triggers a password rotation.
+			"password_wo_version": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				RequiredWith: []string{"password_wo"},
 			},
 
 			"tags": {
@@ -46,8 +66,13 @@ func CreateUser(d *schema.ResourceData, meta any) error {
 
 	name := d.Get("name").(string)
 
+	password, err := userPassword(d)
+	if err != nil {
+		return err
+	}
+
 	userSettings := rabbithole.UserSettings{
-		Password: d.Get("password").(string),
+		Password: password,
 		Tags:     userTagsToString(d),
 	}
 
@@ -100,7 +125,15 @@ func UpdateUser(d *schema.ResourceData, meta any) error {
 
 	name := d.Id()
 	tags := userTagsToString(d)
-	password := d.Get("password").(string)
+
+	// The password is sent on every update, including one that only changes tags.
+	// PUT /api/users replaces the whole user, and UserSettings.Password is `omitempty`,
+	// so an empty value here omits the field and RabbitMQ resets password_hash to "" --
+	// wiping the password and locking the user out, while still returning success.
+	password, err := userPassword(d)
+	if err != nil {
+		return err
+	}
 
 	userSettings := rabbithole.UserSettings{
 		Password: password,
@@ -144,6 +177,33 @@ func DeleteUser(d *schema.ResourceData, meta any) error {
 	}
 
 	return nil
+}
+
+// userPassword resolves the password to send to RabbitMQ. The schema's ExactlyOneOf
+// guarantees that exactly one of password and password_wo is set in configuration.
+//
+// password_wo is a write-only attribute, so it is never persisted to state and
+// d.Get("password_wo") always returns the zero value. It has to be read back out of
+// the raw configuration instead.
+func userPassword(d *schema.ResourceData) (string, error) {
+	password := d.Get("password").(string)
+
+	if !d.GetRawConfig().IsNull() {
+		v, diags := d.GetRawConfigAt(cty.GetAttrPath("password_wo"))
+		if diags.HasError() {
+			return "", fmt.Errorf("error reading password_wo from configuration: %s: %s", diags[0].Summary, diags[0].Detail)
+		}
+		if v.IsKnown() && !v.IsNull() {
+			password = v.AsString()
+		}
+	}
+
+	// An empty password is allowed and meaningful: UserSettings.Password is
+	// `omitempty`, so it is dropped from the request body and RabbitMQ stores the
+	// user with no usable password hash. The internal backend then refuses every
+	// password for that user, which is how a user is set up to authenticate through
+	// a later backend in the auth_backends chain (LDAP, x509) instead.
+	return password, nil
 }
 
 func userTagsToString(d *schema.ResourceData) rabbithole.UserTags {
